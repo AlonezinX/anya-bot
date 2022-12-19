@@ -1,5 +1,5 @@
 
-require('./database/bot')
+require('./settings')
 const { default: MikuBotIncConnect, useSingleFileAuthState, DisconnectReason, fetchLatestBaileysVersion, generateForwardMessageContent, prepareWAMessageMedia, generateWAMessageFromContent, generateMessageID, downloadContentFromMessage, makeInMemoryStore, jidDecode, proto } = require("@adiwajshing/baileys")
 const { state, saveState } = useSingleFileAuthState(`./${sessionName}.json`)
 const pino = require('pino')
@@ -15,6 +15,7 @@ const { smsg, isUrl, generateMessageTag, getBuffer, getSizeMedia, fetchJson, awa
 global.api = (name, path = '/', query = {}, apikeyqueryname) => (name in global.APIs ? global.APIs[name] : name) + path + (query || apikeyqueryname ? '?' + new URLSearchParams(Object.entries({ ...query, ...(apikeyqueryname ? { [apikeyqueryname]: global.APIKeys[name in global.APIs ? global.APIs[name] : name] } : {}) })) : '')
 
 const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
+//const isButton = type == 'buttonsResponseMessage' ? message.buttonsResponseMessage.selectedButtonId : ''
 const { say } =  require('cfonts')
 const { color } = require('./lib/color')
 say('ANYA-MD', {
@@ -34,13 +35,17 @@ say('ANYA-MD', {
     align: 'center',
     gradient: ['red', 'green']
   })
+  class msgRetryCounterMap {
+        MessageRetryMap = {}
+  }
 async function startAnya() {
     const anya = MikuBotIncConnect({
         logger: pino({ level: 'silent' }),
         printQRInTerminal: true,
         browser: ['ANYA-MD','Ubuntu','20.0.04'],
         auth: state,
-        
+        keepAliveIntervalMs: 1800000,
+        msgRetryCounterMap
     })
 
     store.bind(anya.ev)
@@ -85,6 +90,7 @@ async function startAnya() {
      }
     })
     
+
     function pickRandom(list) {
         return list[Math.floor(list.length * Math.random())]
         }
@@ -135,12 +141,13 @@ let mdata = await anya.groupMetadata(anu.id)
 if (anu.action == 'add'){ 
 num = anu.participants[0]
 if(!num.split('@')[0].startsWith(55)) {
-await anya.sendMessage(m.chat, { text: '*numeros estrangeiros não são permitidos neste grupo, consulte um administrador*'})
-anya.groupParticipantsUpdate(m.chat, [num], 'remove')
+await anya.sendMessage(mdata.id, { text: '*numeros estrangeiros não são permitidos neste grupo, consulte um administrador*'})
+anya.groupParticipantsUpdate(mdata.id, [num], 'remove')
 }
 }
 }                
 const dontback = JSON.parse(fs.readFileSync('./database/dontback.json'))
+let mdata = await anya.groupMetadata(anu.id)
 		const dbackid = []
 		for(i=0;i<dontback.length;++i) dbackid.push(dontback[i].groupId)
 		if(dbackid.indexOf(anu.id) >= 0) {
@@ -148,9 +155,9 @@ const dontback = JSON.parse(fs.readFileSync('./database/dontback.json'))
 				num = anu.participants[0]
 				var ind = dbackid.indexOf(anu.id)
 				if(dontback[ind].actived && dontback[ind].number.indexOf(num.split("@")[0]) >= 0) {
-					await anya.sendMessage(m.chat, { text: '*Olha quem deu as cara por aqui, sente o poder do ban cabaço*'})
+					await anya.sendMessage(mdata.id, { text: '*Olha quem deu as cara por aqui, sente o poder do ban cabaço*'})
    setTimeout( () => {
-	anya.groupParticipantsUpdate(m.chat, [num], 'remove')
+	anya.groupParticipantsUpdate(mdata.id, [num], 'remove')
 }, 3000)
 				}
 			}
@@ -287,7 +294,7 @@ scheduleGc();
 	for (let i of kon) {
 	    list.push({
 	    	displayName: await anya.getName(i + '@s.whatsapp.net'),
-	    	vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await anya.getName(i + '@s.whatsapp.net')}\nFN:${await anya.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click To Chat\nitem2.EMAIL;type=INTERNET:GitHub: Miku-bot\nitem2.X-ABLabel:Follow Me On Github\nitem3.URL:YouTube: sacole\nitem3.X-ABLabel:Youtube\nitem4.ADR:;;miku, Mizoram;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`
+	    	vcard: `BEGIN:VCARD\nVERSION:3.0\nN:${await anya.getName(i + '@s.whatsapp.net')}\nFN:${await anya.getName(i + '@s.whatsapp.net')}\nitem1.TEL;waid=${i}:${i}\nitem1.X-ABLabel:Click To Chat\nitem2.EMAIL;type=INTERNET:anya\nitem2.X-ABLabel:Follow Me On Github\nitem3.URL:anya\nitem3.X-ABLabel:Youtube\nitem4.ADR:;;anya, Mizoram;;;;\nitem4.X-ABLabel:Region\nEND:VCARD`
 	    })
 	}
 	anya.sendMessage(jid, { contacts: { displayName: `${list.length} Contact`, contacts: list }, ...opts }, { quoted })
@@ -346,7 +353,7 @@ scheduleGc();
             anya.relayMessage(jid, template.message, { messageId: template.key.id })
     }
      anya.send5ButGif = async (jid , text = '' , footer = '', but = [], options = {}) =>{
-        let message = await prepareWAMessageMedia({ video: fs.readFileSync('./src/MikuBotInc.mp4'), gifPlayback: true }, { upload: anya.waUploadToServer })
+        let message = await prepareWAMessageMedia({ video: fs.readFileSync('./src/anyaBot.mp4'), gifPlayback: true }, { upload: anya.waUploadToServer })
          const template = generateWAMessageFromContent(m.chat, proto.Message.fromObject({
          templateMessage: {
              hydratedTemplate: {
