@@ -1,0 +1,15 @@
+versão : " 3.9 "   # opcional desde v1.27.0
+serviços :
+  web :
+    construir : .
+    portas :
+      - " 8000:5000 "
+    volumes :
+      - .:/código
+      - logvolume01:/var/log
+    links :
+      - redis
+  redis :
+    imagem : redis
+volumes :
+  logvolume01 : {}
