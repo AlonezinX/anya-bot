@@ -141,6 +141,16 @@ const {
   searchResult 
  } = require('./lib/ytdl')
 
+// HOST WHM
+let hostwhm = '' //Host server whm
+let usrwhm = '' //username whm
+let passwhm = '' //Password whm
+let tokenwhm = '' // caranya => https://www.eukhost.com/kb/how-to-generate-an-api-token-using-whm/
+let ipsrv = '' //ip server whm
+
+// Biarin Jgn Di ubah
+let authWhm = {headers: {Authorization: `WHM ${usrwhm}:${tokenwhm}`}}
+
 alonetyping = false
 wlcm = [] 
 nomedobot =  '𝐴𝑵𝒀𝐴-𝑴𝑫'
